@@ -918,12 +918,27 @@ let diamondMuted = false;
 let diamondLastSpoken = '';
 let diamondKnownRequestKeys = new Set();
 
+let cachedVoices = [];
+function loadVoices(){ cachedVoices = window.speechSynthesis.getVoices(); }
+if('speechSynthesis' in window){
+  loadVoices();
+  window.speechSynthesis.onvoiceschanged = loadVoices;
+}
+function getFemaleVoice(){
+  if(!cachedVoices.length) cachedVoices = window.speechSynthesis.getVoices();
+  const femaleNames = ['female','samantha','victoria','zira','susan','karen','moira','tessa','fiona','allison','ava','serena','joanna','salli','kimberly','kendra','amy','emma','olivia','sara','samantha'];
+  let match = cachedVoices.find(v=> femaleNames.some(n=> v.name.toLowerCase().includes(n)));
+  if(!match) match = cachedVoices.find(v=> v.lang && v.lang.startsWith('en'));
+  return match || null;
+}
 function speakText(text){
   if(!('speechSynthesis' in window)){ console.warn('Speech synthesis not supported in this browser.'); return; }
   window.speechSynthesis.cancel();
   const utter = new SpeechSynthesisUtterance(text);
   utter.rate = 1.0;
-  utter.pitch = 1.0;
+  utter.pitch = 1.15;
+  const voice = getFemaleVoice();
+  if(voice) utter.voice = voice;
   window.speechSynthesis.speak(utter);
   diamondLastSpoken = text;
 }
