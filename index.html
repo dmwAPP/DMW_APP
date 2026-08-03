@@ -571,7 +571,8 @@
   <div class="ai2-header">
     <div class="ai2-icon">🤖</div>
     <h2>DIAMOND AI ASSISTANT</h2>
-    <button class="ai2-print-btn" onclick="window.print()">🖨 PRINT / PDF</button>
+    <button class="ai2-print-btn" onclick="resetDemoData()" style="color:#fca5a5;border-color:rgba(239,68,68,.4);">🔄 RESET DEMO DATA</button>
+    <button class="ai2-print-btn" style="margin-left:0;" onclick="window.print()">🖨 PRINT / PDF</button>
   </div>
 
   <div class="ai2-chips" id="aiChips">
@@ -1259,6 +1260,14 @@ function saveWO(){
   closeModal();
 }
 
+function resetDemoData(){
+  if(!confirm("This will WIPE all current work orders, requests, request history, and bulletin posts, then reload fresh demo data. This can't be undone. Continue?")) return;
+  window.fbResetDemoData().then(()=>{
+    alert('Demo data reset. Reloading...');
+    location.reload();
+  }).catch(e=>{ alert('Reset failed: '+e.message); });
+}
+
 setInterval(()=>{ renderTV(); }, 5000);
 
 // ── AI ASSIST (admin only) — search over full request history ──
@@ -1482,7 +1491,7 @@ function toggleLikeBulletin(id){
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
   import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-  import { getFirestore, collection, doc, setDoc, getDoc, addDoc, updateDoc, deleteDoc, onSnapshot, serverTimestamp, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+  import { getFirestore, collection, doc, setDoc, getDoc, getDocs, addDoc, updateDoc, deleteDoc, onSnapshot, serverTimestamp, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyDtT4d5Bdb7bZdJsLYtY7Gjg8xhcLqSKis",
@@ -1585,6 +1594,18 @@ function toggleLikeBulletin(id){
   });
   window.fbDeleteBulletin = (id) => deleteDoc(doc(db,'bulletinPosts', id));
   window.fbUpdateBulletinLikes = (id, likedBy) => updateDoc(doc(db,'bulletinPosts', id), {likedBy});
+
+  window.fbResetDemoData = async () => {
+    const collections = ['workOrders','requests','requestLog','bulletinPosts'];
+    for(const c of collections){
+      const snap = await getDocs(collection(db,c));
+      await Promise.all(snap.docs.map(d=>deleteDoc(d.ref)));
+    }
+    await Promise.all(window.SEED_WOS.map(w=>{ const {id,...rest}=w; return setDoc(doc(db,'workOrders',id), rest); }));
+    await Promise.all(Object.entries(window.SEED_REQUESTS).map(([machine,r])=> setDoc(doc(db,'requests',machine), r)));
+    await Promise.all(window.SEED_REQUEST_LOG.map(r=>{ const {id,...rest}=r; return setDoc(doc(db,'requestLog',id), rest); }));
+    await Promise.all(window.SEED_BULLETIN.map(p=>{ const {id,...rest}=p; return setDoc(doc(db,'bulletinPosts',id), rest); }));
+  };
 </script>
 </body>
 </html>
