@@ -669,6 +669,17 @@
     <label>Part / Description</label><input id="fPart" placeholder="Part name or number">
     <label>Priority</label>
     <select id="fPriority"><option value="normal">Normal</option><option value="high">High</option><option value="hot">Hot</option></select>
+    <label>Machine</label>
+    <select id="fMachine" onchange="document.getElementById('fDayRow').style.display = this.value ? 'block' : 'none'">
+      <option value="">— Leave unassigned (add to pool) —</option>
+    </select>
+    <div id="fDayRow" style="display:none;">
+      <label>Day</label>
+      <select id="fDay">
+        <option value="0">Monday</option><option value="1">Tuesday</option><option value="2">Wednesday</option>
+        <option value="3">Thursday</option><option value="4">Friday</option>
+      </select>
+    </div>
     <div class="row"><button class="btn-cancel" onclick="closeModal()">CANCEL</button><button class="btn-save" onclick="saveWO()">SAVE</button></div>
   </div>
 </div>
@@ -1227,12 +1238,24 @@ function cellClick(el){
   deselectWO();
 }
 function shiftWeek(n){ weekOffset+=n; render(); }
-function openModal(){ document.getElementById('fWO').value=''; document.getElementById('fPart').value=''; document.getElementById('modalOverlay').classList.add('open'); }
+function openModal(){
+  document.getElementById('fWO').value='';
+  document.getElementById('fPart').value='';
+  const sel = document.getElementById('fMachine');
+  sel.innerHTML = '<option value="">— Leave unassigned (add to pool) —</option>' +
+    CELLS.map(c=>`<optgroup label="${c.name}">${c.machines.map(m=>`<option value="${m.n}">${m.n}</option>`).join('')}</optgroup>`).join('');
+  sel.value = '';
+  document.getElementById('fDayRow').style.display = 'none';
+  document.getElementById('modalOverlay').classList.add('open');
+}
 function closeModal(){ document.getElementById('modalOverlay').classList.remove('open'); }
 function saveWO(){
   const wo=document.getElementById('fWO').value.trim(); const part=document.getElementById('fPart').value.trim();
   if(!wo){ alert('Enter a work order number'); return; }
-  window.fbAddWorkOrder({wo, part, priority:document.getElementById('fPriority').value, machine:'', dayIdx:null, weekOff:null});
+  const machine = document.getElementById('fMachine').value;
+  const dayIdx = machine ? parseInt(document.getElementById('fDay').value) : null;
+  const weekOff = machine ? weekOffset : null;
+  window.fbAddWorkOrder({wo, part, priority:document.getElementById('fPriority').value, machine, dayIdx, weekOff});
   closeModal();
 }
 
