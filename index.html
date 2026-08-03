@@ -55,6 +55,19 @@
   .alerts-count{background:var(--red);color:#fff;font-size:11px;font-weight:800;border-radius:999px;
     padding:1px 7px;min-width:19px;text-align:center;}
 
+  .dropdown-panel{position:absolute;top:calc(100% + 8px);background:var(--bg1);border:1px solid var(--steel-lite);
+    border-radius:10px;padding:12px;min-width:200px;box-shadow:0 12px 30px rgba(0,0,0,.5);z-index:50;}
+  .dropdown-header{font-size:9px;letter-spacing:1.5px;color:var(--faint);text-transform:uppercase;margin-bottom:6px;}
+  .dropdown-email{font-size:13px;color:var(--text);margin-bottom:10px;word-break:break-all;}
+  .dropdown-action{width:100%;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.4);color:#fca5a5;
+    border-radius:8px;padding:8px 12px;font-size:12px;cursor:pointer;}
+  .alert-item{background:var(--panel);border:1px solid var(--steel);border-left:3px solid var(--cyan);border-radius:8px;
+    padding:8px 10px;margin-bottom:6px;font-size:12px;cursor:pointer;}
+  .alert-item.red{border-left-color:var(--red);} .alert-item.yellow{border-left-color:var(--amber);}
+  .alert-item b{display:block;color:var(--text);font-size:13px;margin-bottom:2px;}
+  .alert-item span{color:var(--faint);font-size:11px;}
+  .alert-empty{color:var(--faint);font-size:12px;text-align:center;padding:10px 0;}
+
   .nav-tabs-wrap{position:relative;z-index:4;background:var(--bg0);border-bottom:1px solid var(--steel);display:flex;overflow-x:auto;scrollbar-width:none;}
   .nav-tab{font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:2px;color:var(--faint);
     padding:10px 20px;cursor:pointer;border-bottom:3px solid transparent;transition:all .2s;display:flex;align-items:center;gap:8px;white-space:nowrap;}
@@ -457,10 +470,22 @@
     </div>
     <div><h1>Diamond Machine Works</h1><p>"Precision Parts. Every Cut."</p></div>
   </div>
-  <div class="head-right">
-    <span class="role-pill" id="rolePill">👷 Employee</span>
-    <button class="logout-btn" onclick="logout()">Switch Role</button>
-    <div class="alerts-btn">🔔 Alerts <span class="alerts-count">1</span></div>
+  <div class="head-right" style="position:relative;">
+    <div style="position:relative;">
+      <span class="role-pill" id="rolePill" onclick="toggleAccountMenu()" style="cursor:pointer;">👷 Employee</span>
+      <div id="accountMenu" class="dropdown-panel" style="display:none;right:0;">
+        <div class="dropdown-header">SIGNED IN AS</div>
+        <div class="dropdown-email" id="accountEmail">—</div>
+        <button class="dropdown-action" onclick="logout()">🚪 Sign Out</button>
+      </div>
+    </div>
+    <div style="position:relative;">
+      <div class="alerts-btn" onclick="toggleAlertsMenu()" style="cursor:pointer;">🔔 Alerts <span class="alerts-count" id="alertsCount">0</span></div>
+      <div id="alertsMenu" class="dropdown-panel" style="display:none;right:0;width:280px;">
+        <div class="dropdown-header">OPEN REQUESTS</div>
+        <div id="alertsList"></div>
+      </div>
+    </div>
   </div>
 </header>
 
@@ -779,10 +804,41 @@ function applyRole(role, email){
   pill.classList.toggle('admin', role==='admin');
   document.getElementById('tabPlanner').style.display = role==='admin' ? 'flex' : 'none';
   document.getElementById('tabAi').style.display = role==='admin' ? 'flex' : 'none';
+  document.getElementById('accountEmail').textContent = email || 'Unknown';
   if(role!=='admin' && (document.getElementById('page-planner').classList.contains('active') || document.getElementById('page-ai').classList.contains('active'))) switchPage('shop');
   renderFloor(); render(); renderTV();
 }
 window.applyRole = applyRole;
+
+function toggleAccountMenu(){
+  document.getElementById('alertsMenu').style.display = 'none';
+  const menu = document.getElementById('accountMenu');
+  menu.style.display = menu.style.display==='block' ? 'none' : 'block';
+}
+function toggleAlertsMenu(){
+  document.getElementById('accountMenu').style.display = 'none';
+  const menu = document.getElementById('alertsMenu');
+  const opening = menu.style.display !== 'block';
+  menu.style.display = opening ? 'block' : 'none';
+  if(opening) renderAlertsList();
+}
+function renderAlertsList(){
+  const entries = Object.entries(REQUESTS);
+  const typeLabel = {blue:'Pending WO', red:'Inspection', yellow:'Machinist Req'};
+  const el = document.getElementById('alertsList');
+  if(!entries.length){ el.innerHTML = '<div class="alert-empty">No open requests.</div>'; return; }
+  el.innerHTML = entries.map(([machine,r])=>`
+    <div class="alert-item ${r.type}" onclick="switchPage('shop');toggleAlertsMenu();">
+      <b>${machine} — ${typeLabel[r.type]||r.type}</b>
+      <span>${r.operator||'Unknown'}${r.reason ? ' · '+r.reason : ''}</span>
+    </div>`).join('');
+}
+document.addEventListener('click', (e)=>{
+  if(!e.target.closest('.head-right')){
+    document.getElementById('accountMenu').style.display = 'none';
+    document.getElementById('alertsMenu').style.display = 'none';
+  }
+});
 
 function showLoginScreen(){
   document.getElementById('login').classList.remove('hidden');
@@ -943,6 +999,9 @@ window.onRequestsUpdate = function(obj){
   REQUESTS = obj;
   renderFloor(); updateLiveFeedFromRequests(); renderTV();
   if(document.getElementById('page-tv').classList.contains('active')) renderTvCell();
+  const badge = document.getElementById('alertsCount');
+  if(badge) badge.textContent = Object.keys(REQUESTS).length;
+  if(document.getElementById('alertsMenu').style.display==='block') renderAlertsList();
 };
 let activeReqMachine = null;
 let activeReqType = null;
