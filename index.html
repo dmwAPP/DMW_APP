@@ -852,6 +852,50 @@ window.SEED_WOS = [
   {id:'w6', wo:'26-1055', part:'Flange — SS316',         priority:'normal', machine:'', dayIdx:null, weekOff:null},
   {id:'w7', wo:'26-1033', part:'Gear Housing',           priority:'high', machine:'', dayIdx:null, weekOff:null},
   {id:'w8', wo:'26-1060', part:'Turbine Adapter',        priority:'normal', machine:'', dayIdx:null, weekOff:null},
+  {id:'w9', wo:'26-1063', part:'Hydraulic Sleeve',       priority:'normal', machine:'OKK-76R', dayIdx:0, weekOff:0, next:'Ship Tue'},
+  {id:'w10', wo:'26-1064', part:'Valve Body — SS316',    priority:'high', machine:'TS-4000', dayIdx:1, weekOff:0, next:'OP2 — Grind'},
+  {id:'w11', wo:'26-1066', part:'Pump Housing',          priority:'normal', machine:'KIT-2', dayIdx:1, weekOff:0, next:''},
+  {id:'w12', wo:'26-1068', part:'Coupling Flange',       priority:'normal', machine:'NL-2000', dayIdx:2, weekOff:0, next:'Deburr'},
+  {id:'w13', wo:'26-1070', part:'Bushing Set — Bronze',  priority:'hot',  machine:'SL-250', dayIdx:2, weekOff:0, next:'Inspect'},
+  {id:'w14', wo:'26-1072', part:'Adapter Ring',          priority:'normal', machine:'NH4000', dayIdx:3, weekOff:0, next:''},
+  {id:'w15', wo:'26-1074', part:'Drive Shaft',           priority:'high', machine:'NVX5100', dayIdx:3, weekOff:0, next:'OP2 — Balance'},
+  {id:'w16', wo:'26-1076', part:'Retainer Clip Batch',   priority:'normal', machine:'BROACH', dayIdx:4, weekOff:0, next:'Ship Fri'},
+  {id:'w17', wo:'26-1078', part:'Cam Follower',          priority:'normal', machine:'', dayIdx:null, weekOff:null},
+  {id:'w18', wo:'26-1080', part:'Impeller Blank',        priority:'high', machine:'', dayIdx:null, weekOff:null},
+];
+
+// ── Seed data for live open requests (demo) ──
+window.SEED_REQUESTS = {
+  'OKK-53R': {type:'red', machine:'OKK-53R', operator:'Brett Thompson', wo:'26-1042', op:'20', reason:'First Article', supplies:[], details:'Need FAI signed before running rest of batch.', submittedBy:'employee', logId:'seed-log-open-1'},
+  'NLX-2500': {type:'blue', machine:'NLX-2500', operator:'Caleb Dooley', wo:'26-1039', op:'', reason:'', supplies:[], details:'Waiting on updated WO from planning.', submittedBy:'employee', logId:'seed-log-open-2'},
+  'SL-250': {type:'yellow', machine:'SL-250', operator:'Jason Cox', wo:'26-1070', op:'10', reason:'', supplies:['Carbide Inserts','Coolant'], details:'Running low on inserts for this job.', submittedBy:'employee', logId:'seed-log-open-3'}
+};
+
+// ── Seed data for request history log (demo) ──
+const _now = Date.now();
+const _daysAgo = n => new Date(_now - n*24*60*60*1000);
+window.SEED_REQUEST_LOG = [
+  {id:'seed-log-open-1', type:'red', machine:'OKK-53R', operator:'Brett Thompson', wo:'26-1042', op:'20', reason:'First Article', supplies:[], details:'Need FAI signed before running rest of batch.', status:'open', createdAt:_daysAgo(0)},
+  {id:'seed-log-open-2', type:'blue', machine:'NLX-2500', operator:'Caleb Dooley', wo:'26-1039', op:'', reason:'', supplies:[], details:'Waiting on updated WO from planning.', status:'open', createdAt:_daysAgo(0)},
+  {id:'seed-log-open-3', type:'yellow', machine:'SL-250', operator:'Jason Cox', wo:'26-1070', op:'10', reason:'', supplies:['Carbide Inserts','Coolant'], details:'Running low on inserts for this job.', status:'open', createdAt:_daysAgo(0)},
+  {id:'seed-log-4', type:'red', machine:'KIT-1', operator:'Hank Anglin', wo:'26-1051', op:'10', reason:'Random Floor Check', supplies:[], details:'', status:'completed', createdAt:_daysAgo(1), completedAt:_daysAgo(1)},
+  {id:'seed-log-5', type:'yellow', machine:'TS-4000', operator:'Jacob Nail', wo:'26-1064', op:'20', reason:'', supplies:['End Mills'], details:'Needed a fresh 3/8 end mill.', status:'completed', createdAt:_daysAgo(1), completedAt:_daysAgo(1)},
+  {id:'seed-log-6', type:'blue', machine:'PUMA-2600Y', operator:'Chuck Whitfield', wo:'26-1029', op:'', reason:'', supplies:[], details:'WO was late from scheduling, resolved next morning.', status:'completed', createdAt:_daysAgo(2), completedAt:_daysAgo(2)},
+  {id:'seed-log-7', type:'red', machine:'NH4000', operator:'Daniel McGarvey', wo:'26-1072', op:'10', reason:'Calibration Check', supplies:[], details:'', status:'completed', createdAt:_daysAgo(2), completedAt:_daysAgo(2)},
+  {id:'seed-log-8', type:'yellow', machine:'KIT-2', operator:'Keith Groden', wo:'26-1066', op:'10', reason:'', supplies:['Vise Jaws'], details:'Swapped in soft jaws for this fixture.', status:'completed', createdAt:_daysAgo(3), completedAt:_daysAgo(3)},
+  {id:'seed-log-9', type:'red', machine:'NL-2000', operator:'Miguel Vasquez', wo:'26-1068', op:'20', reason:'Need IPC Check', supplies:[], details:'', status:'completed', createdAt:_daysAgo(4), completedAt:_daysAgo(4)},
+  {id:'seed-log-10', type:'blue', machine:'NVX5100', operator:'Brett Thompson', wo:'26-1074', op:'', reason:'', supplies:[], details:'', status:'completed', createdAt:_daysAgo(5), completedAt:_daysAgo(5)},
+  {id:'seed-log-11', type:'yellow', machine:'BROACH', operator:'Caleb Dooley', wo:'26-1076', op:'10', reason:'', supplies:['Coolant','Deburr Tools'], details:'', status:'completed', createdAt:_daysAgo(6), completedAt:_daysAgo(6)},
+  {id:'seed-log-12', type:'red', machine:'OKK-76R', operator:'Jason Cox', wo:'26-1063', op:'10', reason:'NCR Check', supplies:[], details:'Follow-up on prior NCR, passed clean.', status:'completed', createdAt:_daysAgo(6), completedAt:_daysAgo(6)},
+];
+
+// ── Seed data for bulletin board (demo) ──
+window.SEED_BULLETIN = [
+  {id:'seed-bb-1', author:'Will James', authorEmail:'will.j@dmwinc.com', category:'general', message:"Good week everyone — we hit our ship dates on all three big orders. Appreciate the hustle.", imageUrl:'', likedBy:['brett@dmwinc.com','caleb@dmwinc.com'], createdAt:_daysAgo(1)},
+  {id:'seed-bb-2', author:'Brett Thompson', authorEmail:'brett@dmwinc.com', category:'safety', message:"Reminder: safety glasses required in the CNC Mills cell at all times, even just walking through.", imageUrl:'', likedBy:[], createdAt:_daysAgo(2)},
+  {id:'seed-bb-3', author:'Will James', authorEmail:'will.j@dmwinc.com', category:'kudos', message:"Shoutout to Jason for catching a tooling issue on the SL-250 before it became scrap. Nice catch.", imageUrl:'', likedBy:['jason@dmwinc.com'], createdAt:_daysAgo(3)},
+  {id:'seed-bb-4', author:'Caleb Dooley', authorEmail:'caleb@dmwinc.com', category:'maintenance', message:"KIT-2 coolant system due for a flush next week — flagging so it doesn't get missed.", imageUrl:'', likedBy:[], createdAt:_daysAgo(4)},
+  {id:'seed-bb-5', author:'Hank Anglin', authorEmail:'hank@dmwinc.com', category:'questions', message:"Anyone know where the 3/4 gauge pins ended up? Not in the usual drawer.", imageUrl:'', likedBy:[], createdAt:_daysAgo(5)},
 ];
 let WOS = []; // populated live from Firestore 'workOrders' collection
 window.onWorkOrdersUpdate = function(arr){
@@ -1431,6 +1475,9 @@ function toggleLikeBulletin(id){
   const db = getFirestore(app);
 
   let seededWO = false;
+  let seededRequests = false;
+  let seededLog = false;
+  let seededBulletin = false;
   let listenersStarted = false;
 
   window.fbSignIn = (email, password) => signInWithEmailAndPassword(auth, email, password);
@@ -1468,18 +1515,33 @@ function toggleLikeBulletin(id){
     });
 
     onSnapshot(collection(db,'requests'), (snap)=>{
+      if(snap.empty && !seededRequests){
+        seededRequests = true;
+        Object.entries(window.SEED_REQUESTS).forEach(([machine,r])=>{ setDoc(doc(db,'requests', machine), r); });
+        return;
+      }
       const obj = {};
       snap.forEach(d=> obj[d.id] = d.data());
       window.onRequestsUpdate(obj);
     });
 
     onSnapshot(query(collection(db,'requestLog'), orderBy('createdAt','desc')), (snap)=>{
+      if(snap.empty && !seededLog){
+        seededLog = true;
+        window.SEED_REQUEST_LOG.forEach(r=>{ const {id, ...rest} = r; setDoc(doc(db,'requestLog', id), rest); });
+        return;
+      }
       const arr = [];
       snap.forEach(d=> arr.push({id:d.id, ...d.data()}));
       window.onRequestLogUpdate(arr);
     });
 
     onSnapshot(query(collection(db,'bulletinPosts'), orderBy('createdAt','desc')), (snap)=>{
+      if(snap.empty && !seededBulletin){
+        seededBulletin = true;
+        window.SEED_BULLETIN.forEach(p=>{ const {id, ...rest} = p; setDoc(doc(db,'bulletinPosts', id), rest); });
+        return;
+      }
       const arr = [];
       snap.forEach(d=> arr.push({id:d.id, ...d.data()}));
       window.onBulletinUpdate(arr);
