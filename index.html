@@ -226,22 +226,42 @@
 
   #page-planner{padding:16px;height:calc(100vh - 96px);overflow-y:auto;}
 
-  /* ── AI ASSIST (admin only) ── */
-  #page-ai{height:calc(100vh - 88px);flex-direction:column;background:var(--bg0);}
-  .ai-banner{padding:10px 20px;border-bottom:1px solid var(--steel);font-size:11px;color:var(--faint);letter-spacing:.3px;flex-shrink:0;}
-  .ai-banner b{color:var(--cyan);}
-  .ai-messages{flex:1;overflow-y:auto;padding:18px 20px;display:flex;flex-direction:column;gap:12px;}
-  .ai-msg{max-width:80%;padding:11px 15px;border-radius:12px;font-size:13px;line-height:1.5;white-space:pre-line;}
-  .ai-msg.bot{align-self:flex-start;background:var(--panel);border:1px solid var(--steel);color:var(--text);border-bottom-left-radius:3px;}
-  .ai-msg.user{align-self:flex-end;background:rgba(125,211,252,.12);border:1px solid rgba(125,211,252,.4);color:var(--cyan);border-bottom-right-radius:3px;}
-  .ai-suggestions{display:flex;flex-wrap:wrap;gap:8px;padding:0 20px 12px;flex-shrink:0;}
-  .ai-suggest-chip{background:rgba(125,211,252,.06);border:1px solid rgba(125,211,252,.3);color:var(--cyan);border-radius:20px;
-    padding:6px 14px;font-size:12px;cursor:pointer;white-space:nowrap;}
-  .ai-input-row{display:flex;gap:10px;padding:14px 20px;border-top:1px solid var(--steel);flex-shrink:0;}
-  .ai-input-row input{flex:1;background:rgba(255,255,255,.04);border:1px solid var(--steel-lite);border-radius:10px;
+  /* ── AI ASSIST (admin only) — search over request history ── */
+  #page-ai{height:calc(100vh - 88px);flex-direction:column;background:var(--bg0);overflow-y:auto;padding:16px 20px;}
+  .ai2-header{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+  .ai2-icon{width:38px;height:38px;border-radius:10px;background:rgba(125,211,252,.1);border:1px solid rgba(125,211,252,.35);
+    display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+  .ai2-header h2{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px;color:var(--amber);}
+  .ai2-print-btn{margin-left:auto;background:rgba(255,255,255,.04);border:1px solid var(--steel-lite);color:var(--sub);
+    border-radius:8px;padding:7px 14px;font-size:12px;cursor:pointer;}
+
+  .ai2-chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
+  .ai2-chip{background:rgba(255,255,255,.03);border:1px solid var(--steel-lite);color:var(--sub);border-radius:20px;
+    padding:7px 15px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:5px;}
+  .ai2-chip.active{background:var(--amber);border-color:var(--amber);color:#1a1200;}
+  .ai2-chip[data-chip="all"].active{background:var(--cyan);border-color:var(--cyan);}
+
+  .ai2-searchbar{display:flex;gap:10px;margin-bottom:16px;}
+  .ai2-searchbar input{flex:1;background:rgba(255,255,255,.04);border:1px solid var(--steel-lite);border-radius:10px;
     padding:12px 16px;color:var(--text);font-size:14px;}
-  .ai-send-btn{background:linear-gradient(135deg,var(--cyan-dk),var(--cyan));border:none;color:#031018;border-radius:10px;
-    padding:0 22px;font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:1.5px;cursor:pointer;}
+  .ai2-search-btn{background:linear-gradient(135deg,var(--amber),#d97706);border:none;color:#1a1200;border-radius:10px;
+    width:46px;font-size:18px;cursor:pointer;flex-shrink:0;}
+
+  .ai2-help{background:var(--panel);border:1px solid var(--steel);border-radius:12px;padding:18px 20px;font-size:13px;
+    color:var(--text);line-height:1.7;}
+  .ai2-help b{color:var(--cyan);}
+
+  .ai2-results{display:flex;flex-direction:column;gap:10px;}
+  .ai2-result{background:var(--panel);border:1px solid var(--steel);border-left:4px solid var(--cyan);border-radius:10px;
+    padding:12px 16px;font-size:13px;}
+  .ai2-result.red{border-left-color:var(--red);} .ai2-result.yellow{border-left-color:var(--amber);}
+  .ai2-result-top{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:6px;}
+  .ai2-result-wo{font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:1px;color:var(--cyan);}
+  .ai2-result-status{font-size:10px;font-weight:700;letter-spacing:.5px;padding:3px 10px;border-radius:20px;text-transform:uppercase;}
+  .ai2-result-status.open{background:rgba(245,166,35,.15);color:var(--amber);}
+  .ai2-result-status.completed{background:rgba(52,211,153,.15);color:#6ee7b7;}
+  .ai2-result-meta{font-size:11px;color:var(--faint);display:flex;gap:14px;flex-wrap:wrap;margin-bottom:4px;}
+  .ai2-result-details{color:var(--sub);}
 
   /* ── BULLETIN BOARD (everyone) ── */
   #page-bulletin{height:calc(100vh - 88px);flex-direction:column;background:var(--bg0);overflow-y:auto;}
@@ -546,20 +566,31 @@
   </div>
 </div>
 
-<!-- ══ AI ASSIST (admin only) ══ -->
+<!-- ══ AI ASSIST (admin only) — search over request history ══ -->
 <div id="page-ai" class="page">
-  <div class="ai-banner">🤖 <b>DIAMOND ASSIST</b> reads your live schedule, machine status, and open requests — it's not a general chatbot, just a fast way to check the floor without digging through tabs.</div>
-  <div class="ai-messages" id="aiMessages"></div>
-  <div class="ai-suggestions">
-    <div class="ai-suggest-chip" onclick="askAi('What\'s running right now?')">What's running now?</div>
-    <div class="ai-suggest-chip" onclick="askAi('Any hot jobs?')">Any hot jobs?</div>
-    <div class="ai-suggest-chip" onclick="askAi('Any open requests?')">Open requests?</div>
-    <div class="ai-suggest-chip" onclick="askAi('Which machines are idle?')">Idle machines?</div>
+  <div class="ai2-header">
+    <div class="ai2-icon">🤖</div>
+    <h2>DIAMOND AI ASSISTANT</h2>
+    <button class="ai2-print-btn" onclick="window.print()">🖨 PRINT / PDF</button>
   </div>
-  <div class="ai-input-row">
-    <input id="aiInput" placeholder="Ask about the floor..." onkeydown="if(event.key==='Enter')askAi()">
-    <button class="ai-send-btn" onclick="askAi()">ASK</button>
+
+  <div class="ai2-chips" id="aiChips">
+    <button class="ai2-chip active" data-chip="all" onclick="setAiChip('all')">📋 ALL</button>
+    <button class="ai2-chip" data-chip="blue" onclick="setAiChip('blue')">🔵 PENDING WO</button>
+    <button class="ai2-chip" data-chip="yellow" onclick="setAiChip('yellow')">🟡 MACHINIST</button>
+    <button class="ai2-chip" data-chip="red" onclick="setAiChip('red')">🔴 INSPECTION</button>
+    <button class="ai2-chip" data-chip="open" onclick="setAiChip('open')">📂 OPEN</button>
+    <button class="ai2-chip" data-chip="completed" onclick="setAiChip('completed')">✅ COMPLETED</button>
+    <button class="ai2-chip" data-chip="today" onclick="setAiChip('today')">📅 TODAY</button>
+    <button class="ai2-chip" data-chip="week" onclick="setAiChip('week')">🗓 THIS WEEK</button>
   </div>
+
+  <div class="ai2-searchbar">
+    <input id="aiSearchInput" placeholder="Search... WO#, machine, name, type, date range..." onkeydown="if(event.key==='Enter')runAiSearch()">
+    <button class="ai2-search-btn" onclick="runAiSearch()">➤</button>
+  </div>
+
+  <div id="aiResultsWrap"></div>
 </div>
 
 <!-- ══ BULLETIN BOARD (everyone) ══ -->
@@ -781,7 +812,7 @@ function switchPage(p){
   } else {
     clearInterval(tvAutoTimer);
   }
-  if(p==='ai' && !aiGreeted){ aiGreeted=true; addAiMessage('bot', "Hey, I'm Diamond Assist. Ask me what's running, what's overdue, or what requests are open — I'm reading live floor data, not guessing."); }
+  if(p==='ai'){ runAiSearch(); }
 }
 
 function toggleLiveFeed(){
@@ -911,6 +942,7 @@ function submitRequest(){
   const reason = document.querySelector('.quick-reason-btn.selected');
   const data = {
     type: activeReqType,
+    machine: activeReqMachine,
     operator: document.getElementById('reqOperator').value,
     wo: document.getElementById('reqWO').value,
     op: document.getElementById('reqOP').value,
@@ -922,7 +954,11 @@ function submitRequest(){
   window.fbSubmitRequest(activeReqMachine, data);
   closeReqModal();
 }
-function clearRequest(machineName){ window.fbClearRequest(machineName); }
+function clearRequest(machineName){
+  const r = REQUESTS[machineName];
+  if(r && r.logId) window.fbCompleteLog(r.logId);
+  window.fbClearRequest(machineName);
+}
 function updateLiveFeedFromRequests(){
   const keys = Object.keys(REQUESTS);
   if(keys.length){
@@ -1158,57 +1194,101 @@ function saveWO(){
 
 setInterval(()=>{ renderTV(); }, 5000);
 
-// ── AI ASSIST (admin only) — reads live floor data, no external API ──
-let aiGreeted = false;
-function addAiMessage(who, text){
-  const el = document.getElementById('aiMessages');
-  const div = document.createElement('div');
-  div.className = 'ai-msg ' + who;
-  div.textContent = text;
-  el.appendChild(div);
-  el.scrollTop = el.scrollHeight;
-}
-function askAi(preset){
-  const input = document.getElementById('aiInput');
-  const q = (preset || input.value).trim();
-  if(!q) return;
-  addAiMessage('user', q);
-  input.value = '';
-  setTimeout(()=> addAiMessage('bot', answerAi(q)), 300);
-}
-function answerAi(q){
-  const ql = q.toLowerCase();
-  const running = MACHINES.filter(m=>statusFor(m.name).running);
-  const idle = MACHINES.filter(m=>!statusFor(m.name).running);
-  const hot = MACHINES.filter(m=>{const s=statusFor(m.name); return s.running && s.wo.priority==='hot';});
-  const openReqs = Object.entries(REQUESTS);
+// ── AI ASSIST (admin only) — search over full request history ──
+let REQUEST_LOG = [];
+window.onRequestLogUpdate = function(log){
+  REQUEST_LOG = log;
+  if(document.getElementById('page-ai').classList.contains('active')) runAiSearch();
+};
 
-  if(ql.includes('running') || ql.includes('status')){
-    if(!running.length) return "Nothing's scheduled to run today.";
-    return `${running.length} of ${MACHINES.length} machines are running today:\n` +
-      running.map(m=>{ const s=statusFor(m.name); return `• ${m.name} — WO ${s.wo.wo} (${s.wo.part})`; }).join('\n');
+let aiChip = 'all';
+function setAiChip(chip){
+  aiChip = chip;
+  document.querySelectorAll('.ai2-chip').forEach(el=> el.classList.toggle('active', el.dataset.chip===chip));
+  runAiSearch();
+}
+
+function elapsedStr(startMs, endMs){
+  const mins = Math.max(0, Math.round((endMs-startMs)/60000));
+  if(mins < 60) return mins+'m';
+  const h = Math.floor(mins/60), m = mins%60;
+  return `${h}h ${m}m`;
+}
+
+function runAiSearch(){
+  const q = document.getElementById('aiSearchInput').value.trim().toLowerCase();
+  const now = Date.now();
+  const todayStr = new Date().toDateString();
+  const weekAgo = now - 7*24*60*60*1000;
+
+  let results = REQUEST_LOG.filter(r=>{
+    if(['blue','red','yellow'].includes(aiChip) && r.type!==aiChip) return false;
+    if(aiChip==='open' && r.status!=='open') return false;
+    if(aiChip==='completed' && r.status!=='completed') return false;
+    const created = r.createdAt && r.createdAt.toDate ? r.createdAt.toDate() : null;
+    if(aiChip==='today' && (!created || created.toDateString()!==todayStr)) return false;
+    if(aiChip==='week' && (!created || created.getTime()<weekAgo)) return false;
+    return true;
+  });
+
+  if(q){
+    if(q==='today') { const t=new Date().toDateString(); results = results.filter(r=>{const c=r.createdAt&&r.createdAt.toDate?r.createdAt.toDate():null; return c&&c.toDateString()===t;}); }
+    else if(q==='this week') { results = results.filter(r=>{const c=r.createdAt&&r.createdAt.toDate?r.createdAt.toDate().getTime():0; return c>=weekAgo;}); }
+    else if(q==='open'||q==='completed') { results = results.filter(r=>r.status===q); }
+    else {
+      results = results.filter(r=>{
+        const hay = [r.wo, r.op, r.machine, r.operator, r.reason, r.details, (r.supplies||[]).join(' '), r.type]
+          .join(' ').toLowerCase();
+        return hay.includes(q);
+      });
+    }
   }
-  if(ql.includes('hot') || ql.includes('overdue') || ql.includes('priority')){
-    if(!hot.length) return "No hot-priority jobs running right now.";
-    return `${hot.length} hot job(s):\n` + hot.map(m=>{ const s=statusFor(m.name); return `• ${m.name} — WO ${s.wo.wo} (${s.wo.part})`; }).join('\n');
+
+  results.sort((a,b)=>{
+    const ta = a.createdAt && a.createdAt.toDate ? a.createdAt.toDate().getTime() : 0;
+    const tb = b.createdAt && b.createdAt.toDate ? b.createdAt.toDate().getTime() : 0;
+    return tb - ta;
+  });
+
+  renderAiResults(results, q);
+}
+
+function renderAiResults(results, hadQuery){
+  const wrap = document.getElementById('aiResultsWrap');
+  if(!hadQuery && aiChip==='all'){
+    wrap.innerHTML = `<div class="ai2-help">
+Hey — search anything logged in the app. All results are printable as PDF.<br><br>
+<b>🔍 Search options:</b><br>
+• <b>WO#</b> — type "26-1042" → every request on that job<br>
+• <b>Employee</b> — type an operator's name → their full request history<br>
+• <b>Request type</b> — use the quick chips above, or type "machinist", "inspection", "pending"<br>
+• <b>Machine</b> — type "OKK-53R" or "KIT-1" → all requests on that machine<br>
+• <b>Item/Supply</b> — type "coolant", "end mills" → every request mentioning it<br>
+• <b>Date</b> — type "today" or "this week"<br>
+• <b>Status</b> — type "open" or "completed"<br><br>
+Every result shows: date, time, operator, type, WO#, details, elapsed time, status.
+    </div>`;
+    return;
   }
-  if(ql.includes('request') || ql.includes('inspection') || ql.includes('machinist')){
-    if(!openReqs.length) return "No open requests right now — floor's clear.";
-    return `${openReqs.length} open request(s):\n` + openReqs.map(([machine,r])=>{
-      const label = {blue:'Pending WO', red:'Inspection', yellow:'Machinist Req'}[r.type] || r.type;
-      return `• ${machine} — ${label}${r.reason ? ' ('+r.reason+')' : ''}`;
-    }).join('\n');
-  }
-  if(ql.includes('idle') || ql.includes('open') || ql.includes('free') || ql.includes('available')){
-    if(!idle.length) return "Every machine has a job today.";
-    return `${idle.length} idle machine(s):\n` + idle.map(m=>`• ${m.name} (${m.cell})`).join('\n');
-  }
-  if(ql.includes('schedule') || ql.includes('unassigned') || ql.includes('pool')){
-    const unassigned = WOS.filter(w=>!w.machine);
-    if(!unassigned.length) return "Every work order is assigned to a machine.";
-    return `${unassigned.length} unassigned work order(s):\n` + unassigned.map(w=>`• ${w.wo} — ${w.part} (${w.priority})`).join('\n');
-  }
-  return "I can answer questions about what's running, hot jobs, open requests, idle machines, or unassigned work orders. Try one of the suggestions below.";
+  if(!results.length){ wrap.innerHTML = '<div class="ai2-help">No matching requests found.</div>'; return; }
+  const typeLabel = {blue:'Pending WO', red:'Inspection', yellow:'Machinist Req'};
+  wrap.innerHTML = '<div class="ai2-results">' + results.map(r=>{
+    const created = r.createdAt && r.createdAt.toDate ? r.createdAt.toDate() : new Date();
+    const endMs = r.status==='completed' && r.completedAt && r.completedAt.toDate ? r.completedAt.toDate().getTime() : Date.now();
+    return `<div class="ai2-result ${r.type}">
+      <div class="ai2-result-top">
+        <span class="ai2-result-wo">${r.machine} — ${typeLabel[r.type]||r.type}${r.wo?' — WO '+r.wo:''}</span>
+        <span class="ai2-result-status ${r.status}">${r.status}</span>
+      </div>
+      <div class="ai2-result-meta">
+        <span>📅 ${created.toLocaleDateString([],{month:'short',day:'numeric'})}</span>
+        <span>🕐 ${created.toLocaleTimeString([],{hour:'numeric',minute:'2-digit'})}</span>
+        <span>👤 ${r.operator||'Unknown'}</span>
+        <span>⏱ ${elapsedStr(created.getTime(), endMs)}</span>
+      </div>
+      ${r.reason || r.details || (r.supplies||[]).length ? `<div class="ai2-result-details">${[r.reason, r.details, (r.supplies||[]).join(', ')].filter(Boolean).join(' — ')}</div>` : ''}
+    </div>`;
+  }).join('') + '</div>';
 }
 
 // ── BULLETIN BOARD (everyone) — live shared feed ──
@@ -1393,6 +1473,12 @@ function toggleLikeBulletin(id){
       window.onRequestsUpdate(obj);
     });
 
+    onSnapshot(query(collection(db,'requestLog'), orderBy('createdAt','desc')), (snap)=>{
+      const arr = [];
+      snap.forEach(d=> arr.push({id:d.id, ...d.data()}));
+      window.onRequestLogUpdate(arr);
+    });
+
     onSnapshot(query(collection(db,'bulletinPosts'), orderBy('createdAt','desc')), (snap)=>{
       const arr = [];
       snap.forEach(d=> arr.push({id:d.id, ...d.data()}));
@@ -1400,7 +1486,12 @@ function toggleLikeBulletin(id){
     });
   }
 
-  window.fbSubmitRequest = (machine, data) => setDoc(doc(db,'requests', machine), {...data, updatedAt: serverTimestamp()});
+  window.fbSubmitRequest = async (machine, data) => {
+    const logRef = doc(collection(db,'requestLog'));
+    await setDoc(logRef, {...data, status:'open', createdAt: serverTimestamp()});
+    return setDoc(doc(db,'requests', machine), {...data, logId: logRef.id, updatedAt: serverTimestamp()});
+  };
+  window.fbCompleteLog = (logId) => updateDoc(doc(db,'requestLog', logId), {status:'completed', completedAt: serverTimestamp()});
   window.fbClearRequest = (machine) => deleteDoc(doc(db,'requests', machine));
   window.fbAddWorkOrder = (data) => addDoc(collection(db,'workOrders'), data);
   window.fbAssignWorkOrder = (id, machine, dayIdx, weekOff) => updateDoc(doc(db,'workOrders', id), {machine, dayIdx, weekOff});
