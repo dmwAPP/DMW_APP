@@ -425,7 +425,18 @@
   .req-checklist-item button{background:none;border:none;color:#fca5a5;font-size:13px;cursor:pointer;flex:none;padding:0;}
 
   .attach-row{border:2px dashed var(--steel-lite);border-radius:9px;padding:11px;text-align:center;font-size:12px;color:var(--faint);
-    margin-top:12px;cursor:pointer;}
+    margin-top:12px;cursor:pointer;transition:all .15s;}
+  .attach-row:hover{border-color:var(--cyan);color:var(--cyan);}
+  .attach-row.recording{border-color:var(--red);color:#fca5a5;border-style:solid;background:rgba(239,68,68,.08);animation:pulse 1s infinite;}
+  .attach-preview-wrap{display:none;position:relative;margin-top:8px;}
+  .attach-preview-wrap.show{display:block;}
+  .attach-preview-wrap img{width:100%;max-height:180px;object-fit:cover;border-radius:8px;}
+  .attach-preview-remove{position:absolute;top:6px;right:6px;background:rgba(0,0,0,.6);border:none;color:#fff;border-radius:50%;
+    width:22px;height:22px;cursor:pointer;font-size:12px;}
+  .attach-audio-wrap{display:none;margin-top:8px;align-items:center;gap:8px;}
+  .attach-audio-wrap.show{display:flex;}
+  .attach-preview-remove-inline{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.4);color:#fca5a5;
+    border-radius:8px;padding:8px 12px;font-size:11px;cursor:pointer;white-space:nowrap;flex-shrink:0;}
 
   ::-webkit-scrollbar{width:6px;height:6px;} ::-webkit-scrollbar-thumb{background:var(--steel-lite);border-radius:4px;}
 </style>
@@ -510,13 +521,12 @@
 
   <div class="diamond-bar">
     <div class="diamond-avatar">🎙️</div>
-    <div class="diamond-info"><b>DIAMOND</b><span id="diamondStatus">TAP TO ACTIVATE DIAMOND</span></div>
+    <div class="diamond-info"><b>DIAMOND</b><span id="diamondStatus">TAP ON TO ACTIVATE DIAMOND</span></div>
     <div class="diamond-btns">
-      <button onclick="diamondToggle()" id="diamondSpeakBtn">SPEAK</button>
-      <button>▶▶</button>
-      <button>🎵</button>
-      <button onclick="diamondMute()">🔇 MUTE</button>
-      <button class="off" id="diamondOffBtn">OFF</button>
+      <button onclick="diamondSpeak()">🗣 SPEAK STATUS</button>
+      <button onclick="diamondReplay()">▶▶ REPLAY</button>
+      <button onclick="diamondMute()" id="diamondMuteBtn">🔇 MUTE</button>
+      <button onclick="diamondToggle()" id="diamondOffBtn">OFF</button>
     </div>
   </div>
 
@@ -784,8 +794,20 @@
     <label>Additional Details</label>
     <textarea id="reqDetails" placeholder="Additional details..."></textarea>
 
-    <div class="attach-row">📷 Tap to attach a photo (optional)</div>
-    <div class="attach-row">🎙 Tap to record a voice note (optional)</div>
+    <label>Photo (optional)</label>
+    <div class="attach-row" id="reqPhotoRow" onclick="document.getElementById('reqPhotoInput').click()">📷 Tap to attach a photo (optional)</div>
+    <input type="file" id="reqPhotoInput" accept="image/*" style="display:none;" onchange="reqPhotoSelected(this.files[0])">
+    <div class="attach-preview-wrap" id="reqPhotoPreviewWrap">
+      <img id="reqPhotoPreviewImg" src="">
+      <button class="attach-preview-remove" onclick="event.stopPropagation();reqClearPhoto()">✕</button>
+    </div>
+
+    <label>Voice Note (optional)</label>
+    <div class="attach-row" id="reqVoiceRow" onclick="reqToggleRecording()">🎙 Tap to record a voice note (optional)</div>
+    <div class="attach-audio-wrap" id="reqAudioWrap">
+      <audio id="reqAudioPlayback" controls style="width:100%;"></audio>
+      <button class="attach-preview-remove-inline" onclick="reqClearAudio()">✕ Remove</button>
+    </div>
 
     <div class="row"><button class="btn-cancel" onclick="closeReqModal()">CANCEL</button><button class="btn-save" id="reqSubmitBtn" onclick="submitRequest()">SUBMIT</button></div>
   </div>
@@ -892,13 +914,75 @@ function toggleLiveFeed(){
 }
 
 let diamondOn = false;
+let diamondMuted = false;
+let diamondLastSpoken = '';
+let diamondKnownRequestKeys = new Set();
+
+function speakText(text){
+  if(!('speechSynthesis' in window)){ console.warn('Speech synthesis not supported in this browser.'); return; }
+  window.speechSynthesis.cancel();
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.rate = 1.0;
+  utter.pitch = 1.0;
+  window.speechSynthesis.speak(utter);
+  diamondLastSpoken = text;
+}
+
+function buildStatusReport(){
+  const running = MACHINES.filter(m=>statusFor(m.name).running);
+  const hot = running.filter(m=>statusFor(m.name).wo.priority==='hot');
+  const openReqs = Object.entries(REQUESTS);
+  let parts = [];
+  parts.push(`${running.length} of ${MACHINES.length} machines are running today.`);
+  if(hot.length) parts.push(`${hot.length} hot priority job${hot.length>1?'s':''} in progress.`);
+  if(openReqs.length){
+    parts.push(`${openReqs.length} open request${openReqs.length>1?'s':''}.`);
+    openReqs.slice(0,3).forEach(([machine,r])=>{
+      const label = {blue:'a pending work order', red:'an inspection', yellow:'a machinist request'}[r.type] || 'a request';
+      parts.push(`${machine} has ${label}.`);
+    });
+  } else {
+    parts.push('No open requests right now.');
+  }
+  return parts.join(' ');
+}
+
+function diamondSpeak(){
+  if(diamondMuted){ alert('DIAMOND is muted. Tap 🔇 MUTE to unmute first.'); return; }
+  speakText(buildStatusReport());
+}
+function diamondReplay(){
+  if(diamondMuted){ alert('DIAMOND is muted. Tap 🔇 MUTE to unmute first.'); return; }
+  speakText(diamondLastSpoken || buildStatusReport());
+}
+function diamondMute(){
+  diamondMuted = !diamondMuted;
+  window.speechSynthesis.cancel();
+  document.getElementById('diamondMuteBtn').textContent = diamondMuted ? '🔊 UNMUTE' : '🔇 MUTE';
+}
 function diamondToggle(){
   diamondOn = !diamondOn;
-  document.getElementById('diamondStatus').textContent = diamondOn ? 'ON AIR — READING FLOOR UPDATES' : 'TAP TO ACTIVATE DIAMOND';
+  document.getElementById('diamondStatus').textContent = diamondOn ? 'ON AIR — ANNOUNCING NEW REQUESTS' : 'TAP ON TO ACTIVATE DIAMOND';
   document.getElementById('diamondOffBtn').textContent = diamondOn ? 'ON' : 'OFF';
-  document.getElementById('diamondOffBtn').classList.toggle('off', diamondOn);
+  document.getElementById('diamondOffBtn').classList.toggle('off', !diamondOn);
+  if(diamondOn){
+    diamondKnownRequestKeys = new Set(Object.keys(REQUESTS));
+    speakText('DIAMOND is now on air, monitoring the shop floor.');
+  } else {
+    window.speechSynthesis.cancel();
+  }
 }
-function diamondMute(){ /* demo only */ }
+function diamondAnnounceNewRequests(){
+  if(!diamondOn || diamondMuted) return;
+  const currentKeys = Object.keys(REQUESTS);
+  const newKeys = currentKeys.filter(k=>!diamondKnownRequestKeys.has(k));
+  newKeys.forEach(machine=>{
+    const r = REQUESTS[machine];
+    const label = {blue:'a pending work order request', red:'an inspection request', yellow:'a machinist request'}[r.type] || 'a request';
+    speakText(`Attention: ${machine} just submitted ${label}${r.operator ? ' from '+r.operator : ''}.`);
+  });
+  diamondKnownRequestKeys = new Set(currentKeys);
+}
 
 const CELLS = [
   {name:'CNC Mills',  machines:[{n:'KIT-1',sub:'Kitamura 3XG'},{n:'KIT-2',sub:'Kitamura 3XG'},{n:'OKK-53R',sub:'OKK VM53R'}]},
@@ -1002,6 +1086,7 @@ window.onRequestsUpdate = function(obj){
   const badge = document.getElementById('alertsCount');
   if(badge) badge.textContent = Object.keys(REQUESTS).length;
   if(document.getElementById('alertsMenu').style.display==='block') renderAlertsList();
+  diamondAnnounceNewRequests();
 };
 let activeReqMachine = null;
 let activeReqType = null;
@@ -1021,6 +1106,8 @@ function openReqModal(machineName, cellName){
   document.getElementById('reqDetails').value='';
   document.getElementById('supplyChecklist').innerHTML='';
   document.querySelectorAll('.quick-reason-btn').forEach(b=>b.classList.remove('selected'));
+  reqClearPhoto();
+  reqClearAudio();
   document.getElementById('reqModalOverlay').classList.add('open');
 }
 function closeReqModal(){ document.getElementById('reqModalOverlay').classList.remove('open'); }
@@ -1054,6 +1141,71 @@ function renderSupplyChecklist(){
 }
 function removeSupplyItem(i){ supplyList.splice(i,1); renderSupplyChecklist(); }
 
+// ── Photo attach ──
+let reqPhotoData = null;
+function reqPhotoSelected(file){
+  if(!file) return;
+  if(file.size > 900000){ alert('Please choose a smaller photo (under ~900KB).'); return; }
+  const reader = new FileReader();
+  reader.onload = (e)=>{
+    reqPhotoData = e.target.result;
+    document.getElementById('reqPhotoPreviewImg').src = reqPhotoData;
+    document.getElementById('reqPhotoPreviewWrap').classList.add('show');
+    document.getElementById('reqPhotoRow').textContent = '📷 Photo attached — tap to replace';
+  };
+  reader.readAsDataURL(file);
+}
+function reqClearPhoto(){
+  reqPhotoData = null;
+  document.getElementById('reqPhotoPreviewWrap').classList.remove('show');
+  document.getElementById('reqPhotoPreviewImg').src = '';
+  document.getElementById('reqPhotoInput').value = '';
+  document.getElementById('reqPhotoRow').textContent = '📷 Tap to attach a photo (optional)';
+}
+
+// ── Voice note (real microphone recording) ──
+let reqMediaRecorder = null;
+let reqAudioChunks = [];
+let reqAudioData = null;
+let reqRecording = false;
+async function reqToggleRecording(){
+  if(reqRecording){
+    reqMediaRecorder.stop();
+    return;
+  }
+  try{
+    const stream = await navigator.mediaDevices.getUserMedia({audio:true});
+    reqAudioChunks = [];
+    reqMediaRecorder = new MediaRecorder(stream);
+    reqMediaRecorder.ondataavailable = e=> reqAudioChunks.push(e.data);
+    reqMediaRecorder.onstop = ()=>{
+      const blob = new Blob(reqAudioChunks, {type:'audio/webm'});
+      stream.getTracks().forEach(t=>t.stop());
+      const reader = new FileReader();
+      reader.onload = (e)=>{
+        reqAudioData = e.target.result;
+        document.getElementById('reqAudioPlayback').src = reqAudioData;
+        document.getElementById('reqAudioWrap').classList.add('show');
+      };
+      reader.readAsDataURL(blob);
+      reqRecording = false;
+      document.getElementById('reqVoiceRow').classList.remove('recording');
+      document.getElementById('reqVoiceRow').textContent = '🎙 Tap to record a voice note (optional)';
+    };
+    reqMediaRecorder.start();
+    reqRecording = true;
+    document.getElementById('reqVoiceRow').classList.add('recording');
+    document.getElementById('reqVoiceRow').textContent = '🔴 Recording — tap to stop';
+  }catch(e){
+    alert("Couldn't access the microphone. Check your browser's permission settings and try again.");
+  }
+}
+function reqClearAudio(){
+  reqAudioData = null;
+  document.getElementById('reqAudioWrap').classList.remove('show');
+  document.getElementById('reqAudioPlayback').src = '';
+}
+
 function submitRequest(){
   if(!activeReqType){ alert('Select a request type'); return; }
   const reason = document.querySelector('.quick-reason-btn.selected');
@@ -1066,7 +1218,9 @@ function submitRequest(){
     reason: reason ? reason.dataset.r : '',
     supplies: [...supplyList],
     details: document.getElementById('reqDetails').value,
-    submittedBy: currentRole
+    submittedBy: currentRole,
+    photoUrl: reqPhotoData || '',
+    audioUrl: reqAudioData || ''
   };
   window.fbSubmitRequest(activeReqMachine, data);
   closeReqModal();
