@@ -244,20 +244,67 @@
     padding:0 22px;font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:1.5px;cursor:pointer;}
 
   /* ── BULLETIN BOARD (everyone) ── */
-  #page-bulletin{height:calc(100vh - 88px);flex-direction:column;background:var(--bg0);}
-  .bb-composer{padding:14px 20px;border-bottom:1px solid var(--steel);flex-shrink:0;display:flex;gap:10px;flex-wrap:wrap;}
-  .bb-composer textarea{flex:1;min-width:200px;background:rgba(255,255,255,.04);border:1px solid var(--steel-lite);border-radius:10px;
-    padding:10px 14px;color:var(--text);font-size:13px;font-family:inherit;resize:vertical;min-height:44px;}
-  .bb-post-btn{background:linear-gradient(135deg,var(--cyan-dk),var(--cyan));border:none;color:#031018;border-radius:10px;
-    padding:0 20px;font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:1.5px;cursor:pointer;}
-  .bb-feed{flex:1;overflow-y:auto;padding:16px 20px;display:flex;flex-direction:column;gap:12px;}
-  .bb-post{background:var(--panel);border:1px solid var(--steel);border-left:3px solid var(--cyan);border-radius:10px;padding:12px 16px;}
-  .bb-post-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
-  .bb-post-author{font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:1px;color:var(--cyan);}
-  .bb-post-time{font-size:10px;color:var(--faint);letter-spacing:.5px;}
-  .bb-post-msg{font-size:13px;color:var(--text);line-height:1.5;white-space:pre-line;}
-  .bb-post-del{background:none;border:none;color:var(--faint);font-size:11px;cursor:pointer;margin-left:8px;}
-  .bb-empty{color:var(--faint);font-size:13px;text-align:center;margin-top:30px;}
+  #page-bulletin{height:calc(100vh - 88px);flex-direction:column;background:var(--bg0);overflow-y:auto;}
+  .bb-header{background:linear-gradient(135deg,#0e1a24,#122633);border-bottom:2px solid var(--amber);padding:18px 24px;
+    display:flex;align-items:center;gap:20px;flex-wrap:wrap;flex-shrink:0;}
+  .bb-header-icon{width:56px;height:56px;flex-shrink:0;display:flex;align-items:center;justify-content:center;
+    background:rgba(125,211,252,.08);border:1px solid rgba(125,211,252,.3);border-radius:12px;}
+  .bb-header-icon svg{width:34px;height:34px;}
+  .bb-header-text{flex:1;min-width:200px;}
+  .bb-header-text h2{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:2px;color:var(--amber);}
+  .bb-header-text p{font-size:12px;color:var(--sub);margin-top:3px;}
+  .bb-stats{display:flex;gap:22px;}
+  .bb-stat{text-align:center;}
+  .bb-stat .n{font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--text);}
+  .bb-stat .l{font-size:9px;color:var(--faint);letter-spacing:1.5px;text-transform:uppercase;}
+  .bb-new-post-btn{background:linear-gradient(135deg,var(--amber),#d97706);border:none;color:#1a1200;border-radius:9px;
+    padding:11px 20px;font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:1.5px;cursor:pointer;flex-shrink:0;}
+
+  .bb-cats{display:flex;gap:8px;padding:12px 24px;flex-wrap:wrap;border-bottom:1px solid var(--steel);flex-shrink:0;}
+  .bb-cat-btn{background:rgba(255,255,255,.03);border:1px solid var(--steel-lite);color:var(--sub);border-radius:20px;
+    padding:7px 15px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:6px;}
+  .bb-cat-btn.active{background:var(--amber);border-color:var(--amber);color:#1a1200;}
+
+  .bb-feed{flex:1;padding:18px 24px;display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;align-content:start;}
+  .bb-post{background:var(--panel);border:1px solid var(--steel);border-radius:12px;padding:14px 16px;}
+  .bb-post-head{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+  .bb-avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--cyan-dk),var(--cyan));
+    display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:13px;color:#031018;flex-shrink:0;}
+  .bb-post-meta{flex:1;min-width:0;}
+  .bb-post-author{font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:.5px;color:var(--text);}
+  .bb-post-time{font-size:10px;color:var(--faint);}
+  .bb-cat-badge{font-size:9px;font-weight:700;letter-spacing:.5px;padding:3px 9px;border-radius:20px;text-transform:uppercase;flex-shrink:0;}
+  .bb-cat-badge.general{background:rgba(125,211,252,.12);color:var(--cyan);}
+  .bb-cat-badge.safety{background:rgba(239,68,68,.15);color:#fca5a5;}
+  .bb-cat-badge.kudos{background:rgba(245,166,35,.15);color:var(--amber);}
+  .bb-cat-badge.maintenance{background:rgba(148,163,184,.15);color:#cbd5e1;}
+  .bb-cat-badge.schedule{background:rgba(52,211,153,.15);color:#6ee7b7;}
+  .bb-cat-badge.questions{background:rgba(168,85,247,.15);color:#d8b4fe;}
+  .bb-post-del{background:none;border:none;color:var(--faint);font-size:13px;cursor:pointer;flex-shrink:0;}
+  .bb-post-msg{font-size:13px;color:var(--text);line-height:1.5;white-space:pre-line;margin-bottom:10px;}
+  .bb-post-img{width:100%;border-radius:8px;margin-bottom:10px;max-height:220px;object-fit:cover;}
+  .bb-post-actions{display:flex;gap:10px;}
+  .bb-action-btn{background:rgba(255,255,255,.04);border:1px solid var(--steel-lite);color:var(--sub);border-radius:8px;
+    padding:5px 12px;font-size:12px;cursor:pointer;display:flex;align-items:center;gap:5px;}
+  .bb-action-btn.liked{color:#fca5a5;border-color:rgba(239,68,68,.4);background:rgba(239,68,68,.08);}
+  .bb-empty{color:var(--faint);font-size:13px;text-align:center;margin-top:30px;grid-column:1/-1;}
+
+  /* New Post modal */
+  #bbModalOverlay .modal{max-width:440px;}
+  .bb-cat-select{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0 14px;}
+  .bb-cat-opt{background:rgba(255,255,255,.03);border:1px solid var(--steel-lite);color:var(--sub);border-radius:8px;
+    padding:9px 10px;font-size:12px;cursor:pointer;text-align:center;}
+  .bb-cat-opt.selected{border-color:var(--amber);color:var(--amber);background:rgba(245,166,35,.1);}
+  .bb-charcount{font-size:10px;color:var(--faint);text-align:right;margin-top:3px;}
+  .bb-media-row{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;}
+  .bb-media-row input{flex:1;min-width:140px;}
+  .bb-upload-btn{background:rgba(125,211,252,.08);border:1px solid rgba(125,211,252,.35);color:var(--cyan);border-radius:8px;
+    padding:9px 14px;font-size:12px;cursor:pointer;white-space:nowrap;}
+  .bb-preview-wrap{margin-top:10px;position:relative;display:none;}
+  .bb-preview-wrap.show{display:block;}
+  .bb-preview-wrap img{width:100%;max-height:160px;object-fit:cover;border-radius:8px;}
+  .bb-preview-remove{position:absolute;top:6px;right:6px;background:rgba(0,0,0,.6);border:none;color:#fff;border-radius:50%;
+    width:22px;height:22px;cursor:pointer;font-size:12px;}
   .planner-toolbar{display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap;}
   .week-label{font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:2px;color:var(--cyan);min-width:190px;}
   .navbtn{background:var(--bg1);border:1px solid var(--steel);color:var(--text);border-radius:8px;width:34px;height:34px;cursor:pointer;font-size:16px;}
@@ -517,11 +564,71 @@
 
 <!-- ══ BULLETIN BOARD (everyone) ══ -->
 <div id="page-bulletin" class="page">
-  <div class="bb-composer">
-    <textarea id="bbMessage" placeholder="Post an announcement for the shop..."></textarea>
-    <button class="bb-post-btn" onclick="postBulletin()">POST</button>
+  <div class="bb-header">
+    <div class="bb-header-icon">
+      <svg viewBox="0 0 100 90" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <polygon points="50,2 78,26 50,88 22,26" stroke="#7dd3fc" stroke-width="3" stroke-linejoin="round"/>
+        <polyline points="22,26 78,26" stroke="#7dd3fc" stroke-width="3"/>
+        <polyline points="36,26 50,88" stroke="#7dd3fc" stroke-width="2.2"/>
+        <polyline points="64,26 50,88" stroke="#7dd3fc" stroke-width="2.2"/>
+        <polyline points="50,2 36,26" stroke="#7dd3fc" stroke-width="2.2"/>
+        <polyline points="50,2 64,26" stroke="#7dd3fc" stroke-width="2.2"/>
+      </svg>
+    </div>
+    <div class="bb-header-text">
+      <h2>SHOP BULLETIN BOARD</h2>
+      <p>Stay in the loop — post updates, shout-outs, questions & more. What's going on in the shop today?</p>
+    </div>
+    <div class="bb-stats">
+      <div class="bb-stat"><div class="n" id="bbStatTotal">0</div><div class="l">Posts</div></div>
+      <div class="bb-stat"><div class="n" id="bbStatToday">0</div><div class="l">Today</div></div>
+    </div>
+    <button class="bb-new-post-btn" onclick="openBbModal()">✏️ POST</button>
   </div>
+
+  <div class="bb-cats" id="bbCats">
+    <button class="bb-cat-btn active" data-cat="all" onclick="filterBulletin('all')">ALL</button>
+    <button class="bb-cat-btn" data-cat="general" onclick="filterBulletin('general')">💬 GENERAL</button>
+    <button class="bb-cat-btn" data-cat="safety" onclick="filterBulletin('safety')">🦺 SAFETY</button>
+    <button class="bb-cat-btn" data-cat="kudos" onclick="filterBulletin('kudos')">🏆 KUDOS</button>
+    <button class="bb-cat-btn" data-cat="maintenance" onclick="filterBulletin('maintenance')">🔧 MAINTENANCE</button>
+    <button class="bb-cat-btn" data-cat="schedule" onclick="filterBulletin('schedule')">📅 SCHEDULE</button>
+    <button class="bb-cat-btn" data-cat="questions" onclick="filterBulletin('questions')">❓ QUESTIONS</button>
+  </div>
+
   <div class="bb-feed" id="bbFeed"></div>
+</div>
+
+<!-- New Post modal -->
+<div class="modal-overlay" id="bbModalOverlay" onclick="if(event.target===this)closeBbModal()">
+  <div class="modal">
+    <h2>NEW POST</h2>
+    <div class="req-modal-sub">SHARE SOMETHING WITH THE TEAM</div>
+    <label>Your Name</label>
+    <input id="bbName" placeholder="Your name">
+    <label>Category</label>
+    <div class="bb-cat-select" id="bbCatSelect">
+      <div class="bb-cat-opt selected" data-cat="general" onclick="selectBbCat('general')">💬 General</div>
+      <div class="bb-cat-opt" data-cat="safety" onclick="selectBbCat('safety')">🦺 Safety</div>
+      <div class="bb-cat-opt" data-cat="kudos" onclick="selectBbCat('kudos')">🏆 Kudos</div>
+      <div class="bb-cat-opt" data-cat="maintenance" onclick="selectBbCat('maintenance')">🔧 Maintenance</div>
+      <div class="bb-cat-opt" data-cat="schedule" onclick="selectBbCat('schedule')">📅 Schedule</div>
+      <div class="bb-cat-opt" data-cat="questions" onclick="selectBbCat('questions')">❓ Question</div>
+    </div>
+    <label>Message</label>
+    <textarea id="bbMessage" maxlength="500" placeholder="What's on your mind?" oninput="document.getElementById('bbCharCount').textContent = this.value.length + '/500'"></textarea>
+    <div class="bb-charcount" id="bbCharCount">0/500</div>
+    <div class="bb-media-row">
+      <button class="bb-upload-btn" onclick="document.getElementById('bbFileInput').click()">📷 Upload Photo/GIF</button>
+      <input id="bbImageUrl" placeholder="...or paste an image/GIF URL" oninput="bbPreviewFromUrl(this.value)">
+      <input type="file" id="bbFileInput" accept="image/*" style="display:none;" onchange="bbPreviewFromFile(this.files[0])">
+    </div>
+    <div class="bb-preview-wrap" id="bbPreviewWrap">
+      <img id="bbPreviewImg" src="">
+      <button class="bb-preview-remove" onclick="bbClearPreview()">✕</button>
+    </div>
+    <div class="row"><button class="btn-cancel" onclick="closeBbModal()">CANCEL</button><button class="btn-save" onclick="postBulletin()">📌 POST IT</button></div>
+  </div>
 </div>
 
 <div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)closeModal()">
@@ -1106,33 +1213,122 @@ function answerAi(q){
 
 // ── BULLETIN BOARD (everyone) — live shared feed ──
 let BULLETIN_POSTS = [];
+let bbActiveFilter = 'all';
+let bbSelectedCat = 'general';
+let bbPendingImage = null;
+
 window.onBulletinUpdate = function(posts){
   BULLETIN_POSTS = posts;
   renderBulletin();
 };
+
+function initials(name){
+  if(!name) return '?';
+  const parts = name.trim().split(/\s+/);
+  return (parts[0][0] + (parts[1] ? parts[1][0] : '')).toUpperCase();
+}
+
+function openBbModal(){
+  document.getElementById('bbName').value = currentUserEmail ? currentUserEmail.split('@')[0].replace(/[._]/g,' ') : '';
+  document.getElementById('bbMessage').value = '';
+  document.getElementById('bbCharCount').textContent = '0/500';
+  document.getElementById('bbImageUrl').value = '';
+  bbClearPreview();
+  selectBbCat('general');
+  document.getElementById('bbModalOverlay').classList.add('open');
+}
+function closeBbModal(){ document.getElementById('bbModalOverlay').classList.remove('open'); }
+function selectBbCat(cat){
+  bbSelectedCat = cat;
+  document.querySelectorAll('.bb-cat-opt').forEach(el=> el.classList.toggle('selected', el.dataset.cat===cat));
+}
+function bbPreviewFromUrl(url){
+  if(!url){ bbClearPreview(); return; }
+  bbPendingImage = url;
+  document.getElementById('bbPreviewImg').src = url;
+  document.getElementById('bbPreviewWrap').classList.add('show');
+}
+function bbPreviewFromFile(file){
+  if(!file) return;
+  if(file.size > 900000){ alert('Please choose a smaller image (under ~900KB).'); return; }
+  const reader = new FileReader();
+  reader.onload = (e)=>{
+    bbPendingImage = e.target.result;
+    document.getElementById('bbImageUrl').value = '';
+    document.getElementById('bbPreviewImg').src = bbPendingImage;
+    document.getElementById('bbPreviewWrap').classList.add('show');
+  };
+  reader.readAsDataURL(file);
+}
+function bbClearPreview(){
+  bbPendingImage = null;
+  document.getElementById('bbPreviewWrap').classList.remove('show');
+  document.getElementById('bbPreviewImg').src = '';
+  document.getElementById('bbFileInput').value = '';
+}
+
+function filterBulletin(cat){
+  bbActiveFilter = cat;
+  document.querySelectorAll('.bb-cat-btn').forEach(el=> el.classList.toggle('active', el.dataset.cat===cat));
+  renderBulletin();
+}
+
 function renderBulletin(){
+  document.getElementById('bbStatTotal').textContent = BULLETIN_POSTS.length;
+  const todayStr = new Date().toDateString();
+  const todayCount = BULLETIN_POSTS.filter(p=>{
+    const d = p.createdAt && p.createdAt.toDate ? p.createdAt.toDate() : null;
+    return d && d.toDateString()===todayStr;
+  }).length;
+  document.getElementById('bbStatToday').textContent = todayCount;
+
+  const filtered = bbActiveFilter==='all' ? BULLETIN_POSTS : BULLETIN_POSTS.filter(p=>p.category===bbActiveFilter);
   const el = document.getElementById('bbFeed');
-  if(!BULLETIN_POSTS.length){ el.innerHTML = '<div class="bb-empty">No announcements yet.</div>'; return; }
-  el.innerHTML = BULLETIN_POSTS.map(p=>{
+  if(!filtered.length){ el.innerHTML = '<div class="bb-empty">No posts yet — be the first to post something.</div>'; return; }
+
+  el.innerHTML = filtered.map(p=>{
     const time = p.createdAt && p.createdAt.toDate ? p.createdAt.toDate().toLocaleString([],{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}) : 'just now';
     const canDelete = currentRole==='admin' || p.authorEmail===currentUserEmail;
+    const liked = (p.likedBy||[]).includes(currentUserEmail);
+    const catLabel = {general:'💬 General',safety:'🦺 Safety',kudos:'🏆 Kudos',maintenance:'🔧 Maintenance',schedule:'📅 Schedule',questions:'❓ Question'}[p.category] || p.category;
     return `<div class="bb-post">
       <div class="bb-post-head">
-        <span class="bb-post-author">${p.author || 'Unknown'}</span>
-        <span class="bb-post-time">${time}${canDelete ? `<button class="bb-post-del" onclick="deleteBulletin('${p.id}')">✕ delete</button>` : ''}</span>
+        <div class="bb-avatar">${initials(p.author)}</div>
+        <div class="bb-post-meta"><div class="bb-post-author">${p.author||'Unknown'}</div><div class="bb-post-time">${time}</div></div>
+        <span class="bb-cat-badge ${p.category}">${catLabel}</span>
+        ${canDelete ? `<button class="bb-post-del" onclick="deleteBulletin('${p.id}')">✕</button>` : ''}
       </div>
       <div class="bb-post-msg">${p.message}</div>
+      ${p.imageUrl ? `<img class="bb-post-img" src="${p.imageUrl}">` : ''}
+      <div class="bb-post-actions">
+        <button class="bb-action-btn ${liked?'liked':''}" onclick="toggleLikeBulletin('${p.id}')">❤ ${(p.likedBy||[]).length}</button>
+      </div>
     </div>`;
   }).join('');
 }
+
 function postBulletin(){
-  const ta = document.getElementById('bbMessage');
-  const msg = ta.value.trim();
-  if(!msg) return;
-  window.fbPostBulletin(msg, currentUserEmail, currentRole);
-  ta.value = '';
+  const name = document.getElementById('bbName').value.trim() || 'Anonymous';
+  const msg = document.getElementById('bbMessage').value.trim();
+  if(!msg){ alert('Write something first.'); return; }
+  window.fbPostBulletin({
+    author: name,
+    authorEmail: currentUserEmail,
+    category: bbSelectedCat,
+    message: msg,
+    imageUrl: bbPendingImage || ''
+  });
+  closeBbModal();
 }
-function deleteBulletin(id){ window.fbDeleteBulletin(id); }
+function deleteBulletin(id){ if(confirm('Delete this post?')) window.fbDeleteBulletin(id); }
+function toggleLikeBulletin(id){
+  const post = BULLETIN_POSTS.find(p=>p.id===id);
+  if(!post) return;
+  const likedBy = post.likedBy || [];
+  const already = likedBy.includes(currentUserEmail);
+  const next = already ? likedBy.filter(e=>e!==currentUserEmail) : [...likedBy, currentUserEmail];
+  window.fbUpdateBulletinLikes(id, next);
+}
 // Initial render calls happen once Firestore auth/listeners deliver data (see applyRole/onWorkOrdersUpdate/onRequestsUpdate)
 </script>
 
@@ -1208,10 +1404,11 @@ function deleteBulletin(id){ window.fbDeleteBulletin(id); }
   window.fbClearRequest = (machine) => deleteDoc(doc(db,'requests', machine));
   window.fbAddWorkOrder = (data) => addDoc(collection(db,'workOrders'), data);
   window.fbAssignWorkOrder = (id, machine, dayIdx, weekOff) => updateDoc(doc(db,'workOrders', id), {machine, dayIdx, weekOff});
-  window.fbPostBulletin = (message, authorEmail, role) => addDoc(collection(db,'bulletinPosts'), {
-    message, authorEmail, author: authorEmail ? authorEmail.split('@')[0] : 'Unknown', role: role||'employee', createdAt: serverTimestamp()
+  window.fbPostBulletin = (data) => addDoc(collection(db,'bulletinPosts'), {
+    ...data, likedBy: [], createdAt: serverTimestamp()
   });
   window.fbDeleteBulletin = (id) => deleteDoc(doc(db,'bulletinPosts', id));
+  window.fbUpdateBulletinLikes = (id, likedBy) => updateDoc(doc(db,'bulletinPosts', id), {likedBy});
 </script>
 </body>
 </html>
