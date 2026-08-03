@@ -1,0 +1,1041 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Diamond Machine Works — Shop Floor</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@600;700&family=Baloo+2:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg0:#05070a; --bg1:#0b0f14; --bg2:#0e141b; --panel:#101821;
+    --steel:#1d2c3a; --steel-lite:#2a4256;
+    --cyan:#7dd3fc; --cyan-dk:#22d3ee; --cyan-glow: rgba(125,211,252,.35);
+    --amber:#f5a623; --red:#ef4444; --green:#34d399; --blue:#60a5fa;
+    --text:#eef3f7; --sub:#7c8b99; --faint:#3d4c5a;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{height:100%;}
+  body{background:var(--bg0);color:var(--text);font-family:'Barlow',sans-serif;overflow:hidden;}
+  body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+    background-image:linear-gradient(rgba(125,211,252,.02) 1px,transparent 1px),linear-gradient(90deg,rgba(125,211,252,.02) 1px,transparent 1px);
+    background-size:44px 44px;}
+
+  #login{position:fixed;inset:0;z-index:999;background:var(--bg0);display:flex;align-items:center;justify-content:center;}
+  #login.hidden{display:none;}
+  .login-box{background:linear-gradient(160deg,var(--bg1),var(--bg2));border:1px solid var(--steel-lite);
+    border-radius:16px;padding:36px 34px;width:100%;max-width:380px;box-shadow:0 30px 80px rgba(0,0,0,.7);text-align:center;}
+  .login-mark{width:64px;height:64px;margin:0 auto 14px;display:flex;align-items:center;justify-content:center;}
+  .login-mark svg{width:100%;height:100%;filter:drop-shadow(0 0 12px var(--cyan-glow));}
+  .login-box h1{font-family:'Baloo 2',sans-serif;font-weight:700;font-size:22px;letter-spacing:.5px;}
+  .login-box p{font-size:11px;letter-spacing:2px;color:var(--sub);text-transform:uppercase;margin:4px 0 26px;}
+  .role-btn{display:block;width:100%;padding:14px;margin-bottom:10px;border-radius:10px;border:1px solid var(--steel);
+    background:rgba(255,255,255,.03);color:var(--text);font-family:'Bebas Neue',sans-serif;font-size:16px;
+    letter-spacing:2px;cursor:pointer;transition:all .2s;}
+  .role-btn:hover{border-color:var(--cyan);background:rgba(125,211,252,.06);}
+  .role-btn.admin{border-color:rgba(245,166,35,.4);}
+  .role-btn.admin:hover{border-color:var(--amber);background:rgba(245,166,35,.08);}
+  .role-note{font-size:10px;color:var(--faint);margin-top:14px;letter-spacing:.5px;}
+
+  header{position:relative;z-index:5;display:flex;align-items:center;justify-content:space-between;
+    padding:10px 16px;background:linear-gradient(135deg,var(--bg0),var(--bg1));border-bottom:2px solid var(--cyan-dk);
+    box-shadow:0 2px 20px rgba(0,0,0,.6);flex-wrap:wrap;gap:8px;}
+  .brand{display:flex;align-items:center;gap:12px;}
+  .brand-mark{width:34px;height:34px;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+  .brand-mark svg{width:100%;height:100%;filter:drop-shadow(0 0 6px var(--cyan-glow));}
+  .brand h1{font-family:'Baloo 2',sans-serif;font-weight:700;font-size:19px;letter-spacing:.5px;color:var(--text);line-height:1;}
+  .brand p{font-size:10px;color:var(--faint);font-style:italic;margin-top:3px;}
+  .head-right{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+  .role-pill{font-family:'Bebas Neue',sans-serif;font-size:12px;letter-spacing:1.5px;padding:6px 14px;border-radius:8px;
+    border:1px solid var(--steel-lite);color:var(--sub);display:flex;align-items:center;gap:6px;}
+  .role-pill.admin{border-color:rgba(245,166,35,.6);color:var(--amber);background:rgba(245,166,35,.08);}
+  .logout-btn{background:rgba(255,255,255,.05);border:1px solid var(--steel);color:var(--sub);border-radius:8px;
+    padding:7px 13px;font-size:11px;cursor:pointer;}
+  .alerts-btn{background:rgba(255,255,255,.04);border:1px solid var(--steel-lite);border-radius:8px;
+    padding:7px 14px;display:flex;align-items:center;gap:8px;color:var(--text);font-size:13px;font-weight:600;cursor:pointer;}
+  .alerts-count{background:var(--red);color:#fff;font-size:11px;font-weight:800;border-radius:999px;
+    padding:1px 7px;min-width:19px;text-align:center;}
+
+  .nav-tabs-wrap{position:relative;z-index:4;background:var(--bg0);border-bottom:1px solid var(--steel);display:flex;overflow-x:auto;scrollbar-width:none;}
+  .nav-tab{font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:2px;color:var(--faint);
+    padding:10px 20px;cursor:pointer;border-bottom:3px solid transparent;transition:all .2s;display:flex;align-items:center;gap:8px;white-space:nowrap;}
+  .nav-tab:hover{color:var(--sub);background:rgba(255,255,255,.02);}
+  .nav-tab.active{color:var(--cyan);border-bottom-color:var(--cyan);background:rgba(125,211,252,.06);
+    text-shadow:0 0 14px var(--cyan-glow);}
+  .admin-badge{font-size:9px;background:rgba(245,166,35,.15);color:var(--amber);border:1px solid rgba(245,166,35,.4);
+    border-radius:5px;padding:1px 6px;letter-spacing:1px;}
+
+  .page{display:none;position:relative;z-index:2;}
+  .page.active{display:block;}
+
+  #page-shop{height:calc(100vh - 88px);overflow:hidden;padding:6px 8px;display:flex;flex-direction:column;gap:5px;}
+
+  .live-feed-strip{background:rgba(125,211,252,.05);border:1px solid rgba(125,211,252,.25);border-radius:8px;
+    padding:5px 12px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;flex-shrink:0;}
+  .live-feed-strip b{font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:2px;color:var(--cyan);}
+  .live-feed-strip span{font-size:10px;color:var(--faint);letter-spacing:1px;}
+  .live-feed-body{background:var(--bg1);border:1px solid var(--steel);border-radius:8px;padding:8px 12px;
+    display:none;align-items:center;gap:12px;flex-shrink:0;}
+  .live-feed-body.open{display:flex;}
+  .live-feed-body .lbl{font-size:10px;color:var(--faint);letter-spacing:1px;}
+  .live-feed-body .lbl small{display:block;font-size:9px;color:var(--faint);}
+  .lf-chip{display:inline-flex;align-items:center;gap:8px;background:rgba(245,166,35,.08);border:1px solid rgba(245,166,35,.4);
+    border-radius:20px;padding:5px 12px;}
+  .lf-dot{width:8px;height:8px;border-radius:50%;background:var(--amber);box-shadow:0 0 8px var(--amber);animation:pulse 1.4s infinite;}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+  .lf-chip b{font-family:'Bebas Neue',sans-serif;font-size:12px;color:var(--amber);letter-spacing:1px;}
+  .lf-chip span{font-size:10px;color:var(--sub);}
+
+  .diamond-bar{background:linear-gradient(135deg,#0e1a24,#122633);border:1px solid rgba(125,211,252,.35);
+    border-radius:10px;padding:6px 12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;flex-shrink:0;
+    box-shadow:0 0 16px rgba(125,211,252,.06);}
+  .diamond-avatar{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--cyan-dk),var(--cyan));
+    display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;box-shadow:0 0 12px var(--cyan-glow);}
+  .diamond-info{flex:1;min-width:120px;}
+  .diamond-info b{font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:2px;color:var(--cyan);display:block;line-height:1;}
+  .diamond-info span{font-size:9px;color:var(--faint);letter-spacing:.5px;}
+  .diamond-btns{display:flex;gap:5px;flex-wrap:wrap;}
+  .diamond-btns button{background:rgba(125,211,252,.1);border:1px solid rgba(125,211,252,.35);color:var(--cyan);
+    border-radius:6px;padding:4px 9px;font-size:10px;font-weight:700;letter-spacing:1px;cursor:pointer;}
+  .diamond-btns button.off{background:rgba(125,211,252,.18);}
+
+  .floor-grid{display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:1fr 1fr;gap:5px;flex:1;min-height:0;}
+  @media(max-width:820px){.floor-grid{grid-template-columns:repeat(2,1fr);grid-template-rows:repeat(4,1fr);}}
+  .cell{background:linear-gradient(175deg,#0e1620,#121d29);border-radius:8px;padding:5px 6px;
+    border:1px solid rgba(125,211,252,.15);box-shadow:0 4px 14px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.03);
+    display:flex;flex-direction:column;min-height:0;}
+  .cell-title{font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--cyan);
+    margin-bottom:4px;padding-bottom:3px;border-bottom:1px solid rgba(125,211,252,.2);display:flex;align-items:center;gap:5px;flex-shrink:0;}
+  .cell-title::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--cyan-dk);box-shadow:0 0 6px var(--cyan-dk);}
+  .machines{display:flex;flex-direction:column;gap:4px;flex:1;min-height:0;}
+  .machine{position:relative;background:linear-gradient(160deg,#152230,#0f1922);border-radius:6px;
+    border:1px solid rgba(125,211,252,.2);padding:4px 8px 4px 10px;flex:1;min-height:0;display:flex;align-items:center;
+    justify-content:space-between;transition:all .15s;cursor:default;}
+  .machine::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;border-radius:6px 0 0 6px;background:var(--cyan);opacity:.5;}
+  .machine.running::before{background:var(--green);opacity:1;box-shadow:0 0 10px var(--green);}
+  .machine.hot::before{background:var(--red);opacity:1;box-shadow:0 0 10px var(--red);}
+  .machine.high::before{background:var(--amber);opacity:1;box-shadow:0 0 10px var(--amber);}
+  .machine-name{font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:1px;color:#f5d97a;line-height:1.1;
+    text-shadow:0 0 6px rgba(245,217,122,.35);}
+  .machine-sub{font-size:8px;color:var(--faint);letter-spacing:.3px;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .machine-led{width:8px;height:8px;border-radius:50%;flex-shrink:0;background:var(--steel);}
+  .machine.running .machine-led{background:var(--green);box-shadow:0 0 7px var(--green);animation:pulse 1.6s infinite;}
+  .machine.hot .machine-led{background:var(--red);box-shadow:0 0 7px var(--red);animation:pulse .8s infinite;}
+  .machine.high .machine-led{background:var(--amber);box-shadow:0 0 7px var(--amber);animation:pulse 1.2s infinite;}
+
+  .fab-row{background:rgba(217,119,6,.06);border:1px solid rgba(217,119,6,.3);border-radius:8px;
+    padding:5px 12px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;flex-shrink:0;}
+  .fab-row .flabel{font-family:'Bebas Neue',sans-serif;font-size:10px;letter-spacing:1.5px;color:#d97706;display:flex;align-items:center;gap:5px;}
+  .fab-row .flabel::before{content:'';width:5px;height:5px;border-radius:50%;background:#d97706;}
+  .fab-chip{background:rgba(255,255,255,.03);border:1px solid rgba(217,119,6,.25);border-radius:6px;padding:3px 11px;
+    font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:1px;color:#e3c396;}
+
+  #page-tv{height:calc(100vh - 88px);overflow:hidden;display:flex;flex-direction:column;background:var(--bg0);}
+  #page-tv:fullscreen{height:100vh;}
+  .tv-toolbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+  .tv-toolbar .lbl{font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:2px;color:var(--sub);}
+  .tv-fullscreen-btn{background:linear-gradient(135deg,var(--cyan-dk),var(--cyan));border:none;color:#031018;
+    font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:2px;padding:9px 18px;border-radius:8px;cursor:pointer;}
+  .tv-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;}
+  .tv-card{background:linear-gradient(160deg,#0e151c,#131b24);border:1px solid var(--steel);border-left:4px solid var(--cyan);
+    border-radius:12px;padding:14px 16px;}
+  .tv-card.hot{border-left-color:var(--red);} .tv-card.high{border-left-color:var(--amber);} .tv-card.idle{border-left-color:var(--faint);opacity:.55;}
+  .tv-mname{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:1.5px;color:var(--cyan);}
+  .tv-card.hot .tv-mname{color:#fca5a5;} .tv-card.high .tv-mname{color:#fcd34d;} .tv-card.idle .tv-mname{color:#6b7a88;}
+  .tv-pill{font-size:10px;font-weight:700;letter-spacing:1px;padding:3px 9px;border-radius:999px;text-transform:uppercase;float:right;}
+  .tv-pill.run{background:rgba(52,211,153,.15);color:#6ee7b7;border:1px solid rgba(52,211,153,.35);}
+  .tv-pill.idle{background:rgba(148,163,184,.12);color:#94a3b8;border:1px solid rgba(148,163,184,.25);}
+  .tv-job{font-size:11px;color:var(--sub);margin-top:8px;}
+  .tv-part{font-size:14px;color:#dbe6ee;font-weight:600;margin-bottom:6px;}
+  .tv-next{margin-top:8px;padding-top:8px;border-top:1px solid var(--steel);font-size:11px;color:#9fb0bd;}
+
+  #tvFullscreen{position:fixed;inset:0;background:var(--bg0);display:none;flex-direction:column;z-index:200;}
+  #tvFullscreen.open{display:flex;}
+  .tvfs2-head{display:flex;align-items:center;justify-content:space-between;padding:14px 26px 10px;
+    border-bottom:2px solid var(--amber);background:var(--bg0);}
+  .tvfs2-head-left{display:flex;align-items:center;gap:14px;}
+  .tvfs2-accent{width:4px;height:44px;background:var(--amber);border-radius:2px;flex-shrink:0;}
+  .tvfs2-eyebrow{font-size:11px;letter-spacing:3px;color:var(--sub);text-transform:uppercase;margin-bottom:2px;}
+  .tvfs2-title{font-family:'Bebas Neue',sans-serif;font-size:30px;letter-spacing:2px;color:var(--amber);line-height:1;}
+  .tvfs2-dots{display:flex;align-items:center;gap:10px;}
+  .tvfs2-dotwrap{display:flex;gap:7px;}
+  .tvfs2-dot{width:11px;height:11px;border-radius:50%;background:var(--steel-lite);transition:all .2s;}
+  .tvfs2-dot.active{background:var(--amber);box-shadow:0 0 10px var(--amber);}
+  .tvfs2-celllbl{font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:2px;color:var(--sub);}
+  .tvfs2-exit{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.4);color:#fca5a5;border-radius:8px;
+    padding:6px 14px;font-family:'Bebas Neue',sans-serif;font-size:12px;letter-spacing:1px;cursor:pointer;margin-left:14px;}
+
+  .tvfs2-viewbar{display:flex;align-items:center;gap:10px;padding:10px 26px;border-bottom:1px solid var(--steel);flex-wrap:nowrap;}
+  .tvfs2-viewlbl{font-size:11px;letter-spacing:1.5px;color:var(--faint);text-transform:uppercase;flex-shrink:0;}
+  .tvfs2-viewbtn{background:transparent;border:1px solid var(--steel-lite);color:var(--sub);border-radius:8px;
+    padding:7px 16px;font-size:12px;font-weight:700;letter-spacing:.5px;cursor:pointer;flex-shrink:0;white-space:nowrap;}
+  .tvfs2-viewbtn.active{border-color:var(--amber);color:var(--amber);background:rgba(245,166,35,.08);}
+  .tvfs2-viewbtn.on{border-color:var(--amber);color:var(--amber);background:rgba(245,166,35,.1);}
+  .tvfs2-speed{display:flex;align-items:center;gap:8px;font-size:11px;letter-spacing:1.5px;color:var(--faint);text-transform:uppercase;flex-shrink:0;}
+  .tvfs2-speed input{accent-color:var(--amber);}
+  .tvfs2-speedval{color:var(--amber);font-weight:700;min-width:20px;}
+  .tvfs2-advance-track{flex:1;height:4px;background:var(--steel);border-radius:3px;overflow:hidden;margin:0 6px;min-width:60px;}
+  .tvfs2-advance-fill{height:100%;background:var(--amber);width:0%;border-radius:3px;transition:width .1s linear;}
+  .tvfs2-pause{background:rgba(255,255,255,.04);border:1px solid var(--steel-lite);color:var(--sub);border-radius:8px;
+    padding:7px 14px;font-size:12px;font-weight:700;letter-spacing:.5px;cursor:pointer;flex-shrink:0;white-space:nowrap;}
+  .tvfs2-status{display:flex;align-items:center;gap:6px;font-size:11px;letter-spacing:1px;color:var(--green);
+    border:1px solid rgba(52,211,153,.4);background:rgba(52,211,153,.08);border-radius:8px;padding:7px 14px;flex-shrink:0;white-space:nowrap;}
+  .tvfs2-status .dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);}
+
+  .tvfs2-cellhead{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-shrink:0;}
+  .tvfs2-cellname{font-family:'Bebas Neue',sans-serif;font-size:34px;letter-spacing:2px;color:var(--amber);
+    padding-bottom:8px;border-bottom:1px solid rgba(245,166,35,.3);flex:1;}
+  .tvfs2-counter{font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:1px;color:var(--amber);
+    border:1px solid rgba(245,166,35,.4);border-radius:8px;padding:5px 14px;margin-left:16px;}
+  .tvfs2-body{flex:1;overflow:hidden;padding:16px 26px 20px;display:flex;flex-direction:column;}
+  .tvfs2-clockwrap{text-align:right;flex-shrink:0;}
+  .tvfs2-clock{font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:1px;color:#fff;line-height:1;}
+  .tvfs2-date{font-size:10px;color:var(--sub);letter-spacing:1px;text-transform:uppercase;margin-top:2px;}
+
+  .tvfs2-cards{flex:1;overflow-y:auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;align-content:start;}
+  .tvfs-card{background:linear-gradient(160deg,rgba(52,211,153,.06),rgba(15,25,20,.6));border:1px solid rgba(52,211,153,.25);
+    border-left:5px solid var(--green);border-radius:12px;padding:18px 22px;flex-shrink:0;}
+  .tvfs-card.idle{border-left-color:var(--faint);background:linear-gradient(160deg,#10161d,#0e141b);opacity:.7;}
+  .tvfs-card.hot{border-left-color:var(--red);background:linear-gradient(160deg,rgba(239,68,68,.08),rgba(25,15,15,.6));}
+  .tvfs-card.high{border-left-color:var(--amber);background:linear-gradient(160deg,rgba(245,166,35,.08),rgba(25,20,10,.6));}
+  .tvfs-card-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px;padding-bottom:14px;
+    border-bottom:1px solid rgba(255,255,255,.06);}
+  .tvfs-mname{font-family:'Bebas Neue',sans-serif;font-size:30px;letter-spacing:1.5px;color:#f5d97a;line-height:1;}
+  .tvfs-mcell{font-size:11px;letter-spacing:1.5px;color:var(--faint);text-transform:uppercase;margin-top:4px;}
+  .tvfs-chip{font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:1px;color:var(--green);
+    border:1px solid rgba(52,211,153,.5);border-radius:20px;padding:8px 18px;white-space:nowrap;}
+  .tvfs-card.idle .tvfs-chip{color:var(--faint);border-color:var(--steel-lite);}
+  .tvfs-card.hot .tvfs-chip{color:#fca5a5;border-color:rgba(239,68,68,.5);}
+  .tvfs-card.high .tvfs-chip{color:#fcd34d;border-color:rgba(245,166,35,.5);}
+  .tvfs-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px;}
+  .tvfs-stat{text-align:center;}
+  .tvfs-stat .bar{height:3px;width:40px;margin:0 auto 10px;border-radius:2px;}
+  .tvfs-stat.parts .bar{background:var(--amber);}
+  .tvfs-stat.oee .bar{background:var(--sub);}
+  .tvfs-stat.util .bar{background:var(--blue);}
+  .tvfs-stat .val{font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--text);margin-bottom:2px;}
+  .tvfs-stat .lbl{font-size:10px;letter-spacing:2px;color:var(--faint);text-transform:uppercase;}
+  .tvfs-cycle{font-size:12px;color:var(--sub);margin-bottom:8px;}
+  .tvfs-cycle b{color:var(--green);font-weight:700;}
+  .tvfs-progress{height:9px;border-radius:5px;background:var(--steel);overflow:hidden;}
+  .tvfs-progress .fill{height:100%;background:linear-gradient(90deg,var(--green),var(--blue));border-radius:5px;}
+  .tvfs-card.idle .tvfs-progress .fill{background:var(--faint);}
+
+  #page-planner{padding:16px;height:calc(100vh - 96px);overflow-y:auto;}
+  .planner-toolbar{display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap;}
+  .week-label{font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:2px;color:var(--cyan);min-width:190px;}
+  .navbtn{background:var(--bg1);border:1px solid var(--steel);color:var(--text);border-radius:8px;width:34px;height:34px;cursor:pointer;font-size:16px;}
+  .hint{font-size:11px;color:var(--faint);margin-left:auto;}
+  .add-btn{background:rgba(52,211,153,.12);border:1px solid rgba(52,211,153,.4);color:#6ee7b7;border-radius:8px;
+    padding:8px 16px;font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:1.5px;cursor:pointer;}
+  .grid{display:grid;grid-template-columns:110px repeat(5,1fr);border:1px solid var(--steel);border-radius:10px;overflow:hidden;}
+  .g-corner,.g-day{background:var(--bg1);padding:8px;border-bottom:2px solid var(--steel);}
+  .g-day{text-align:center;}
+  .g-day .dname{font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:2px;color:var(--sub);}
+  .g-day .ddate{font-family:'Bebas Neue',sans-serif;font-size:18px;color:var(--text);}
+  .g-day.today .dname,.g-day.today .ddate{color:var(--cyan);}
+  .g-machine{background:var(--bg2);padding:6px 8px;border-right:2px solid var(--steel);border-top:1px solid var(--steel);display:flex;flex-direction:column;justify-content:center;}
+  .g-machine b{font-family:'Bebas Neue',sans-serif;font-size:12px;letter-spacing:1px;color:var(--text);}
+  .g-machine span{font-size:8px;color:var(--faint);}
+  .g-cell{background:var(--panel);border-top:1px solid var(--steel);border-right:1px solid var(--steel);min-height:56px;padding:3px;cursor:pointer;}
+  .g-cell:hover{background:#151d27;}
+  .wo-chip{border-radius:6px;padding:4px 6px;margin-bottom:2px;font-size:10px;line-height:1.2;border-left:3px solid var(--cyan);background:rgba(125,211,252,.08);}
+  .wo-chip.hot{border-left-color:var(--red);background:rgba(239,68,68,.10);} .wo-chip.high{border-left-color:var(--amber);background:rgba(245,166,35,.10);}
+  .wo-chip .wnum{font-family:'Bebas Neue',sans-serif;font-size:12px;color:var(--cyan);}
+  .wo-chip.hot .wnum{color:#fca5a5;} .wo-chip.high .wnum{color:#fcd34d;}
+  .pool{margin-top:16px;border:1px solid var(--steel);border-radius:10px;background:var(--bg1);}
+  .pool-head{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--steel);}
+  .pool-head b{font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:2px;color:var(--sub);}
+  .pool-count{background:rgba(239,68,68,.15);color:#fca5a5;border-radius:999px;padding:1px 9px;font-size:11px;font-weight:700;}
+  .pool-body{padding:12px 14px;display:flex;flex-wrap:wrap;gap:8px;}
+  .pool-card{background:var(--panel);border:1px solid var(--steel);border-left:4px solid var(--cyan);border-radius:8px;padding:8px 10px;min-width:170px;cursor:pointer;}
+  .pool-card.hot{border-left-color:var(--red);} .pool-card.high{border-left-color:var(--amber);}
+  .pool-card.selected{outline:2px solid var(--cyan);}
+  .pool-card .pnum{font-family:'Bebas Neue',sans-serif;font-size:15px;color:var(--cyan);}
+  .pool-card.hot .pnum{color:#fca5a5;} .pool-card.high .pnum{color:#fcd34d;}
+  .pool-card .ppart{font-size:11px;color:#c7d2db;margin-top:1px;}
+  .select-banner{display:none;align-items:center;gap:10px;background:rgba(125,211,252,.10);border:1px solid var(--cyan);border-radius:8px;padding:9px 14px;margin-bottom:12px;}
+  .select-banner span{font-family:'Bebas Neue',sans-serif;letter-spacing:1px;color:var(--cyan);font-size:13px;flex:1;}
+  .select-banner button{background:transparent;border:1px solid var(--cyan);color:var(--cyan);border-radius:6px;padding:5px 12px;font-family:'Bebas Neue',sans-serif;font-size:12px;cursor:pointer;}
+
+  .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:99;display:none;align-items:flex-start;justify-content:center;padding:16px;overflow-y:auto;}
+  .modal-overlay.open{display:flex;}
+  .modal{background:var(--bg1);border:1px solid var(--steel-lite);border-radius:14px;padding:22px;width:100%;max-width:400px;margin:20px 0 40px;}
+  .modal h2{font-family:'Bebas Neue',sans-serif;font-size:19px;letter-spacing:2px;color:var(--cyan);margin-bottom:12px;}
+  .modal label{font-size:10px;letter-spacing:1px;color:var(--sub);text-transform:uppercase;display:block;margin:9px 0 4px;}
+  .modal input,.modal select,.modal textarea{width:100%;background:rgba(255,255,255,.04);border:1px solid var(--steel);border-radius:8px;padding:9px 12px;color:var(--text);font-size:14px;font-family:inherit;}
+  .modal textarea{resize:vertical;min-height:60px;}
+  .modal .row{display:flex;gap:10px;margin-top:16px;}
+  .modal button{flex:1;padding:11px;border-radius:8px;font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:1px;cursor:pointer;border:none;}
+  .btn-cancel{background:rgba(255,255,255,.06);color:var(--sub);}
+  .btn-save{background:linear-gradient(135deg,var(--cyan-dk),var(--cyan));color:#031018;}
+
+  /* ── ADD REQUEST MODAL ── */
+  #reqModalOverlay .modal{max-width:460px;}
+  .req-modal-sub{font-size:12px;color:var(--sub);letter-spacing:2px;text-transform:uppercase;margin:-6px 0 16px;}
+  .req-type-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+  .req-type-btn{border-radius:10px;border:2px solid transparent;padding:13px 14px;text-align:left;cursor:pointer;background:rgba(255,255,255,.03);transition:all .15s;}
+  .req-type-btn .rt-label{font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:1px;display:flex;align-items:center;gap:8px;margin-bottom:3px;}
+  .req-type-btn .rt-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+  .req-type-btn .rt-desc{font-size:11px;color:var(--sub);}
+  .req-type-btn.blue{border-color:#3b82f6;} .req-type-btn.blue .rt-dot{background:#3b82f6;}
+  .req-type-btn.blue.selected{background:rgba(59,130,246,.15);}
+  .req-type-btn.red{border-color:var(--red);} .req-type-btn.red .rt-dot{background:var(--red);}
+  .req-type-btn.red.selected{background:rgba(239,68,68,.15);}
+  .req-type-btn.yellow{border-color:var(--amber);} .req-type-btn.yellow .rt-dot{background:var(--amber);}
+  .req-type-btn.yellow.selected{background:rgba(245,166,35,.15);}
+  .req-type-btn.full{grid-column:1/-1;}
+
+  .recall-row{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:4px;}
+  .recall-label{font-size:9px;color:var(--faint);letter-spacing:1.5px;text-transform:uppercase;margin:10px 0 4px;font-weight:700;}
+  .recall-chip{display:inline-flex;align-items:center;padding:3px 11px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:.5px;
+    cursor:pointer;border:1px solid rgba(245,166,35,.4);background:rgba(245,166,35,.08);color:var(--amber);white-space:nowrap;}
+  .recall-chip.op-chip{border-color:rgba(125,211,252,.4);background:rgba(125,211,252,.08);color:var(--cyan);}
+
+  .quick-reason-title{font-size:11px;color:#fca5a5;letter-spacing:.5px;margin:14px 0 8px;line-height:1.4;}
+  .quick-reason-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:6px;}
+  .quick-reason-btn{background:rgba(255,255,255,.03);border:1px solid rgba(239,68,68,.35);color:#fca5a5;border-radius:8px;
+    padding:10px 8px;font-size:12px;cursor:pointer;text-align:center;transition:all .15s;}
+  .quick-reason-btn.selected{background:rgba(239,68,68,.22);border-color:#fca5a5;color:#fff;}
+
+  .supply-label{font-size:11px;color:var(--amber);letter-spacing:1px;margin:14px 0 6px;display:flex;align-items:center;gap:6px;}
+  .add-to-req-btn{width:100%;background:linear-gradient(135deg,#16a34a,#22c55e);color:#04140a;border:none;border-radius:9px;
+    padding:11px;font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:1.5px;cursor:pointer;margin-top:10px;}
+  .req-checklist{margin-top:8px;display:flex;flex-direction:column;gap:6px;}
+  .req-checklist-item{background:rgba(245,166,35,.08);border:1px solid rgba(245,166,35,.35);border-radius:7px;
+    padding:7px 10px;font-size:12px;color:#fcd34d;display:flex;justify-content:space-between;align-items:center;}
+  .req-checklist-item button{background:none;border:none;color:#fca5a5;font-size:13px;cursor:pointer;flex:none;padding:0;}
+
+  .attach-row{border:2px dashed var(--steel-lite);border-radius:9px;padding:11px;text-align:center;font-size:12px;color:var(--faint);
+    margin-top:12px;cursor:pointer;}
+
+  ::-webkit-scrollbar{width:6px;height:6px;} ::-webkit-scrollbar-thumb{background:var(--steel-lite);border-radius:4px;}
+</style>
+</head>
+<body>
+
+<div id="login">
+  <div class="login-box">
+    <div class="login-mark">
+      <svg viewBox="0 0 100 90" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <polygon points="50,2 78,26 50,88 22,26" stroke="#eef3f7" stroke-width="2.5" stroke-linejoin="round"/>
+        <polyline points="22,26 78,26" stroke="#eef3f7" stroke-width="2.5"/>
+        <polyline points="36,26 50,88" stroke="#eef3f7" stroke-width="2"/>
+        <polyline points="64,26 50,88" stroke="#eef3f7" stroke-width="2"/>
+        <polyline points="50,2 36,26" stroke="#eef3f7" stroke-width="2"/>
+        <polyline points="50,2 64,26" stroke="#eef3f7" stroke-width="2"/>
+      </svg>
+    </div>
+    <h1>Diamond Machine Works</h1>
+    <p>Shop Floor App</p>
+    <label style="text-align:left;display:block;font-size:10px;letter-spacing:1px;color:var(--sub);text-transform:uppercase;margin-bottom:4px;">Email</label>
+    <input id="loginEmail" type="email" placeholder="you@diamondmachineworks.com" style="width:100%;background:rgba(255,255,255,.04);border:1px solid var(--steel-lite);border-radius:8px;padding:11px 14px;color:var(--text);font-size:14px;margin-bottom:10px;">
+    <label style="text-align:left;display:block;font-size:10px;letter-spacing:1px;color:var(--sub);text-transform:uppercase;margin-bottom:4px;">Password</label>
+    <input id="loginPassword" type="password" placeholder="••••••••" style="width:100%;background:rgba(255,255,255,.04);border:1px solid var(--steel-lite);border-radius:8px;padding:11px 14px;color:var(--text);font-size:14px;margin-bottom:14px;">
+    <button class="role-btn admin" onclick="doSignIn()" id="signInBtn">SIGN IN</button>
+    <div id="loginError" style="color:#fca5a5;font-size:12px;margin-top:8px;display:none;"></div>
+    <div class="role-note">Accounts are created by your admin in Firebase. Contact Will if you need one.</div>
+  </div>
+</div>
+
+<header>
+  <div class="brand">
+    <div class="brand-mark">
+      <svg viewBox="0 0 100 90" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <polygon points="50,2 78,26 50,88 22,26" stroke="#7dd3fc" stroke-width="3" stroke-linejoin="round"/>
+        <polyline points="22,26 78,26" stroke="#7dd3fc" stroke-width="3"/>
+        <polyline points="36,26 50,88" stroke="#7dd3fc" stroke-width="2.2"/>
+        <polyline points="64,26 50,88" stroke="#7dd3fc" stroke-width="2.2"/>
+        <polyline points="50,2 36,26" stroke="#7dd3fc" stroke-width="2.2"/>
+        <polyline points="50,2 64,26" stroke="#7dd3fc" stroke-width="2.2"/>
+      </svg>
+    </div>
+    <div><h1>Diamond Machine Works</h1><p>"Precision Parts. Every Cut."</p></div>
+  </div>
+  <div class="head-right">
+    <span class="role-pill" id="rolePill">👷 Employee</span>
+    <button class="logout-btn" onclick="logout()">Switch Role</button>
+    <div class="alerts-btn">🔔 Alerts <span class="alerts-count">1</span></div>
+  </div>
+</header>
+
+<div class="nav-tabs-wrap">
+  <div class="nav-tab active" id="tabShop" onclick="switchPage('shop')">🏭 SHOP FLOOR</div>
+  <div class="nav-tab" id="tabTv" onclick="switchPage('tv')">📺 SHOP TV</div>
+  <div class="nav-tab" id="tabPlanner" style="display:none;" onclick="switchPage('planner')">📅 SCHEDULE <span class="admin-badge">ADMIN</span></div>
+</div>
+
+<div id="page-shop" class="page active">
+
+  <div class="live-feed-strip" onclick="toggleLiveFeed()">
+    <b>⚡ LIVE FEED</b>
+    <span id="liveFeedToggle">TAP TO VIEW ▼</span>
+  </div>
+  <div class="live-feed-body" id="liveFeedBody">
+    <div class="lbl">LIVE FEED<small>tap to expand</small></div>
+    <div class="lf-chip"><div class="lf-dot"></div><b id="lfMachine">—</b><span id="lfOp">—</span></div>
+  </div>
+
+  <div class="diamond-bar">
+    <div class="diamond-avatar">🎙️</div>
+    <div class="diamond-info"><b>DIAMOND</b><span id="diamondStatus">TAP TO ACTIVATE DIAMOND</span></div>
+    <div class="diamond-btns">
+      <button onclick="diamondToggle()" id="diamondSpeakBtn">SPEAK</button>
+      <button>▶▶</button>
+      <button>🎵</button>
+      <button onclick="diamondMute()">🔇 MUTE</button>
+      <button class="off" id="diamondOffBtn">OFF</button>
+    </div>
+  </div>
+
+  <div class="floor-grid" id="floorGrid"></div>
+
+  <div class="fab-row">
+    <div class="flabel">FABRICATION</div>
+    <div class="fab-chip">SAW</div>
+    <div class="fab-chip">MANUAL</div>
+    <div class="fab-chip">WELDERS</div>
+  </div>
+</div>
+
+<div id="page-tv" class="page">
+  <div class="tvfs2-head">
+    <div class="tvfs2-head-left">
+      <div class="tvfs2-accent"></div>
+      <div>
+        <div class="tvfs2-eyebrow">Diamond Machine Works · Floor Analytics</div>
+        <div class="tvfs2-title">SHOP FLOOR — LIVE STATUS</div>
+      </div>
+    </div>
+    <div class="tvfs2-dots">
+      <div class="tvfs2-dotwrap" id="tvfsDots"></div>
+      <div class="tvfs2-celllbl" id="tvfsCellLbl">—</div>
+    </div>
+    <div class="tvfs2-clockwrap">
+      <div class="tvfs2-clock" id="tvClock">--:--</div>
+      <div class="tvfs2-date" id="tvDate">—</div>
+    </div>
+  </div>
+
+  <div class="tvfs2-viewbar">
+    <span class="tvfs2-viewlbl">View:</span>
+    <button class="tvfs2-viewbtn active" id="tvModeBtnCell" onclick="setTvMode('cell')">BY CELL</button>
+    <button class="tvfs2-viewbtn" id="tvModeBtnPriority" onclick="setTvMode('priority')">PRIORITY FIRST</button>
+    <button class="tvfs2-viewbtn" id="tvModeBtnAll" onclick="setTvMode('all')">ALL MACHINES</button>
+    <button class="tvfs2-viewbtn on" onclick="toggleMachineStatus()" id="tvMachineStatusBtn">⚡ MACHINE STATUS</button>
+    <div class="tvfs2-speed">SPEED:
+      <input type="range" id="tvSpeed" min="3" max="15" value="12" oninput="restartAutoAdvance()">
+      <span class="tvfs2-speedval" id="tvSpeedVal">12S</span>
+    </div>
+    <div class="tvfs2-advance-track"><div class="tvfs2-advance-fill" id="tvAdvanceFill"></div></div>
+    <button class="tvfs2-pause" id="tvPauseBtn" onclick="togglePause()">⏸ PAUSE</button>
+    <div class="tvfs2-status"><span class="dot"></span>DATA SYNCED</div>
+    <button class="tvfs2-exit" id="tvFullscreenBtn" onclick="toggleRealFullscreen()" style="background:rgba(125,211,252,.1);border-color:rgba(125,211,252,.4);color:var(--cyan);">⛶</button>
+  </div>
+
+  <div class="tvfs2-body">
+    <div class="tvfs2-cellhead">
+      <div class="tvfs2-cellname" id="tvCellName">—</div>
+      <div class="tvfs2-counter" id="tvCounter">1 / 8</div>
+    </div>
+    <div class="tvfs2-cards" id="tvfsCards"></div>
+  </div>
+</div>
+
+<div id="page-planner" class="page">
+  <div class="select-banner" id="selectBanner">
+    <span id="selectLabel"></span>
+    <button onclick="deselectWO()">CANCEL</button>
+  </div>
+  <div class="planner-toolbar">
+    <button class="navbtn" onclick="shiftWeek(-1)">‹</button>
+    <div class="week-label" id="weekLabel"></div>
+    <button class="navbtn" onclick="shiftWeek(1)">›</button>
+    <span class="hint">Tap a WO below, then tap a machine/day cell.</span>
+    <button class="add-btn" onclick="openModal()">＋ ADD WORK ORDER</button>
+  </div>
+  <div class="grid" id="grid"></div>
+  <div class="pool">
+    <div class="pool-head"><b>UNASSIGNED WORK ORDERS</b><span class="pool-count" id="poolCount">0</span></div>
+    <div class="pool-body" id="poolBody"></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <h2>ADD WORK ORDER</h2>
+    <label>Work Order #</label><input id="fWO" placeholder="e.g. 10452">
+    <label>Part / Description</label><input id="fPart" placeholder="Part name or number">
+    <label>Priority</label>
+    <select id="fPriority"><option value="normal">Normal</option><option value="high">High</option><option value="hot">Hot</option></select>
+    <div class="row"><button class="btn-cancel" onclick="closeModal()">CANCEL</button><button class="btn-save" onclick="saveWO()">SAVE</button></div>
+  </div>
+</div>
+
+<!-- ══ ADD REQUEST MODAL — the money feature ══ -->
+<div class="modal-overlay" id="reqModalOverlay" onclick="if(event.target===this)closeReqModal()">
+  <div class="modal">
+    <h2>ADD REQUEST</h2>
+    <div class="req-modal-sub" id="reqModalCell">—</div>
+
+    <div class="req-type-grid">
+      <div class="req-type-btn blue" id="rtBlue" onclick="selectReqType('blue')">
+        <div class="rt-label"><span class="rt-dot"></span>PENDING WO</div>
+        <div class="rt-desc">Work order pending</div>
+      </div>
+      <div class="req-type-btn red" id="rtRed" onclick="selectReqType('red')">
+        <div class="rt-label"><span class="rt-dot"></span>INSPECTION</div>
+        <div class="rt-desc">Quality check needed</div>
+      </div>
+      <div class="req-type-btn yellow full" id="rtYellow" onclick="selectReqType('yellow')">
+        <div class="rt-label"><span class="rt-dot"></span>MACHINIST REQ</div>
+        <div class="rt-desc">Tool or fixture request</div>
+      </div>
+    </div>
+
+    <label>Operator</label>
+    <select id="reqOperator">
+      <option>Brett Thompson</option><option>Caleb Dooley</option><option>Chuck Whitfield</option>
+      <option>Daniel McGarvey</option><option>Hank Anglin</option><option>Jacob Nail</option>
+      <option>Jason Cox</option><option>Keith Groden</option><option>Miguel Vasquez</option>
+    </select>
+
+    <div class="recall-label">⚡ Recent WO#</div>
+    <div class="recall-row">
+      <span class="recall-chip" onclick="fillWO('1042')">1042</span>
+      <span class="recall-chip" onclick="fillWO('1039')">1039</span>
+    </div>
+    <div class="row" style="margin-top:8px;">
+      <input id="reqWO" placeholder="WO# (e.g. 26-0288)">
+      <input id="reqOP" placeholder="OP# (e.g. 10)">
+    </div>
+    <div class="recall-label">⚡ Recent OP#</div>
+    <div class="recall-row">
+      <span class="recall-chip op-chip" onclick="fillOP('10')">OP 10</span>
+      <span class="recall-chip op-chip" onclick="fillOP('20')">OP 20</span>
+    </div>
+
+    <!-- INSPECTION quick reasons -->
+    <div id="inspectionBlock" style="display:none;">
+      <div class="quick-reason-title">QUICK REASON (optional — skips WO#/OP# if no job applies)</div>
+      <div class="quick-reason-grid" id="quickReasonGrid">
+        <div class="quick-reason-btn" data-r="Part Check">Part Check</div>
+        <div class="quick-reason-btn" data-r="First Article">First Article</div>
+        <div class="quick-reason-btn" data-r="Calibration Check">Calibration Check</div>
+        <div class="quick-reason-btn" data-r="Random Floor Check">Random Floor Check</div>
+        <div class="quick-reason-btn" data-r="Need IPC Check">Need IPC Check</div>
+        <div class="quick-reason-btn" data-r="NCR Check">NCR Check</div>
+      </div>
+    </div>
+
+    <!-- MACHINIST REQ supply items -->
+    <div id="machinistBlock" style="display:none;">
+      <div class="supply-label">⚙ SUPPLY ITEM</div>
+      <select id="supplyItem">
+        <option value="">— Select supply item —</option>
+        <option>Carbide Inserts</option><option>End Mills</option><option>Coolant</option>
+        <option>Vise Jaws</option><option>Collets</option><option>Deburr Tools</option>
+        <option>Fixture Plate</option><option>Gauge Pins</option>
+      </select>
+      <button class="add-to-req-btn" onclick="addSupplyItem()">＋ ADD TO REQUEST</button>
+      <div class="req-checklist" id="supplyChecklist"></div>
+    </div>
+
+    <label>Additional Details</label>
+    <textarea id="reqDetails" placeholder="Additional details..."></textarea>
+
+    <div class="attach-row">📷 Tap to attach a photo (optional)</div>
+    <div class="attach-row">🎙 Tap to record a voice note (optional)</div>
+
+    <div class="row"><button class="btn-cancel" onclick="closeReqModal()">CANCEL</button><button class="btn-save" id="reqSubmitBtn" onclick="submitRequest()">SUBMIT</button></div>
+  </div>
+</div>
+
+<script>
+let currentRole = null;
+
+function applyRole(role){
+  currentRole = role;
+  document.getElementById('login').classList.add('hidden');
+  const pill = document.getElementById('rolePill');
+  pill.textContent = role==='admin' ? '👑 Admin' : '👷 Employee';
+  pill.classList.toggle('admin', role==='admin');
+  document.getElementById('tabPlanner').style.display = role==='admin' ? 'flex' : 'none';
+  if(role!=='admin' && document.getElementById('page-planner').classList.contains('active')) switchPage('shop');
+  renderFloor(); render(); renderTV();
+}
+window.applyRole = applyRole;
+
+function showLoginScreen(){
+  document.getElementById('login').classList.remove('hidden');
+  document.getElementById('signInBtn').disabled = false;
+  document.getElementById('signInBtn').textContent = 'SIGN IN';
+}
+window.showLoginScreen = showLoginScreen;
+
+async function doSignIn(){
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  const errEl = document.getElementById('loginError');
+  errEl.style.display = 'none';
+  if(!email || !password){ errEl.textContent = 'Enter your email and password.'; errEl.style.display='block'; return; }
+  document.getElementById('signInBtn').disabled = true;
+  document.getElementById('signInBtn').textContent = 'SIGNING IN...';
+  try{
+    await window.fbSignIn(email, password);
+    // onAuthStateChanged in the Firebase module will call applyRole()
+  }catch(e){
+    document.getElementById('signInBtn').disabled = false;
+    document.getElementById('signInBtn').textContent = 'SIGN IN';
+    errEl.textContent = e.code==='auth/invalid-credential' ? 'Incorrect email or password.' : e.message;
+    errEl.style.display = 'block';
+  }
+}
+function logout(){ window.fbSignOut(); }
+
+function switchPage(p){
+  if(p==='planner' && currentRole!=='admin') return;
+  const map = {shop:'tabShop', tv:'tabTv', planner:'tabPlanner'};
+  ['shop','tv','planner'].forEach(id=>{
+    document.getElementById('page-'+id).classList.toggle('active', id===p);
+    document.getElementById(map[id]).classList.toggle('active', id===p);
+  });
+  if(p==='tv'){
+    tvCellIdx = 0;
+    renderTvDots();
+    renderTvCell();
+    restartAutoAdvance();
+  } else {
+    clearInterval(tvAutoTimer);
+  }
+}
+
+function toggleLiveFeed(){
+  const b = document.getElementById('liveFeedBody');
+  const open = b.classList.toggle('open');
+  document.getElementById('liveFeedToggle').textContent = open ? 'TAP TO HIDE ▲' : 'TAP TO VIEW ▼';
+}
+
+let diamondOn = false;
+function diamondToggle(){
+  diamondOn = !diamondOn;
+  document.getElementById('diamondStatus').textContent = diamondOn ? 'ON AIR — READING FLOOR UPDATES' : 'TAP TO ACTIVATE DIAMOND';
+  document.getElementById('diamondOffBtn').textContent = diamondOn ? 'ON' : 'OFF';
+  document.getElementById('diamondOffBtn').classList.toggle('off', diamondOn);
+}
+function diamondMute(){ /* demo only */ }
+
+const CELLS = [
+  {name:'CNC Mills',  machines:[{n:'KIT-1',sub:'Kitamura 3XG'},{n:'KIT-2',sub:'Kitamura 3XG'},{n:'OKK-53R',sub:'OKK VM53R'}]},
+  {name:'CNC Mills B',machines:[{n:'OKK-76R',sub:'OKK VM76R'},{n:'NH4000',sub:'Mori NH4000 DCG'},{n:'NVX5100',sub:'Mori NVX5100 II'}]},
+  {name:'CNC Lathes A',machines:[{n:'PUMA-2600Y',sub:'Doosan Puma'},{n:'TS-4000',sub:'Takisawa'},{n:'NLX-2500',sub:'Mori NLX'}]},
+  {name:'CNC Lathes B',machines:[{n:'NL-2000',sub:'Mori NL2000'},{n:'SL-250',sub:'Mori SL250'},{n:'SL-200',sub:'Mori SL200'}]},
+  {name:'Manual / Misc',machines:[{n:'BROACH',sub:'ACME Horizontal'},{n:'HONE-1',sub:'Sunnen Hone'},{n:'HONE-2',sub:'Sunnen Hone'}]},
+  {name:'Manual B',machines:[{n:'TRAK MILL',sub:'Trak Mill'},{n:'BPORT',sub:'Bridgeport Mill'},{n:'CHUCKER-1',sub:'Hardinge'}]},
+  {name:'Jig / Broach',machines:[{n:'CHUCKER-2',sub:'Hardinge'},{n:'JIG BORE',sub:'Moore'},{n:'LEBLONDE',sub:'Leblonde Lathe'}]},
+  {name:'Automation',machines:[{n:'SL-150',sub:'Mori SL150'}]},
+];
+const MACHINES = CELLS.flatMap(c=>c.machines.map(m=>({name:m.n, cell:c.name})));
+
+// Seed data — written to Firestore automatically the first time workOrders is empty
+window.SEED_WOS = [
+  {id:'w1', wo:'26-1042', part:'Bracket Assy — 4130', priority:'hot',  machine:'OKK-53R', dayIdx:0, weekOff:0, next:'Deburr & Inspect'},
+  {id:'w2', wo:'26-1039', part:'Shaft Coupling',        priority:'high', machine:'NLX-2500', dayIdx:0, weekOff:0, next:'OP2 — Threading'},
+  {id:'w3', wo:'26-1051', part:'Manifold Block',         priority:'normal', machine:'KIT-1', dayIdx:1, weekOff:0, next:''},
+  {id:'w4', wo:'26-1029', part:'Spindle Nut',            priority:'normal', machine:'PUMA-2600Y', dayIdx:0, weekOff:0, next:'Ship Fri'},
+  {id:'w5', wo:'26-1048', part:'Landing Gear Pin',       priority:'hot',  machine:'', dayIdx:null, weekOff:null},
+  {id:'w6', wo:'26-1055', part:'Flange — SS316',         priority:'normal', machine:'', dayIdx:null, weekOff:null},
+  {id:'w7', wo:'26-1033', part:'Gear Housing',           priority:'high', machine:'', dayIdx:null, weekOff:null},
+  {id:'w8', wo:'26-1060', part:'Turbine Adapter',        priority:'normal', machine:'', dayIdx:null, weekOff:null},
+];
+let WOS = []; // populated live from Firestore 'workOrders' collection
+window.onWorkOrdersUpdate = function(arr){
+  WOS = arr;
+  renderFloor(); render(); renderTV();
+};
+let weekOffset = 0, selectedId = null;
+
+function todayIdx(){ const d=new Date().getDay(); return Math.max(0,Math.min(4, d===0?4:d-1)); }
+function statusFor(machineName){
+  const w = WOS.find(x=>x.machine===machineName && x.dayIdx===todayIdx() && x.weekOff===0);
+  if(!w) return {running:false};
+  return {running:true, wo:w};
+}
+
+// ── REQUESTS (the money feature) — keyed by machine name, live from Firestore ──
+let REQUESTS = {};
+window.onRequestsUpdate = function(obj){
+  REQUESTS = obj;
+  renderFloor(); updateLiveFeedFromRequests(); renderTV();
+  if(document.getElementById('page-tv').classList.contains('active')) renderTvCell();
+};
+let activeReqMachine = null;
+let activeReqType = null;
+let supplyList = [];
+
+const REQ_COLORS = {blue:'#3b82f6', red:'#ef4444', yellow:'#f5a623'};
+
+function openReqModal(machineName, cellName){
+  activeReqMachine = machineName;
+  activeReqType = null;
+  supplyList = [];
+  document.getElementById('reqModalCell').textContent = `${cellName.toUpperCase()} — ${machineName}`;
+  ['rtBlue','rtRed','rtYellow'].forEach(id=>document.getElementById(id).classList.remove('selected'));
+  document.getElementById('inspectionBlock').style.display='none';
+  document.getElementById('machinistBlock').style.display='none';
+  document.getElementById('reqWO').value=''; document.getElementById('reqOP').value='';
+  document.getElementById('reqDetails').value='';
+  document.getElementById('supplyChecklist').innerHTML='';
+  document.querySelectorAll('.quick-reason-btn').forEach(b=>b.classList.remove('selected'));
+  document.getElementById('reqModalOverlay').classList.add('open');
+}
+function closeReqModal(){ document.getElementById('reqModalOverlay').classList.remove('open'); }
+
+function selectReqType(type){
+  activeReqType = type;
+  ['blue','red','yellow'].forEach(t=>{
+    document.getElementById('rt'+t.charAt(0).toUpperCase()+t.slice(1)).classList.toggle('selected', t===type);
+  });
+  document.getElementById('inspectionBlock').style.display = type==='red' ? 'block' : 'none';
+  document.getElementById('machinistBlock').style.display = type==='yellow' ? 'block' : 'none';
+}
+function fillWO(v){ document.getElementById('reqWO').value = '26-'+v; }
+function fillOP(v){ document.getElementById('reqOP').value = v; }
+
+document.getElementById('quickReasonGrid').addEventListener('click', e=>{
+  const btn = e.target.closest('.quick-reason-btn'); if(!btn) return;
+  document.querySelectorAll('.quick-reason-btn').forEach(b=>b.classList.remove('selected'));
+  btn.classList.add('selected');
+});
+function addSupplyItem(){
+  const sel = document.getElementById('supplyItem');
+  if(!sel.value) return;
+  supplyList.push(sel.value);
+  renderSupplyChecklist();
+  sel.value='';
+}
+function renderSupplyChecklist(){
+  document.getElementById('supplyChecklist').innerHTML = supplyList.map((s,i)=>
+    `<div class="req-checklist-item"><span>${s}</span><button onclick="removeSupplyItem(${i})">✕</button></div>`).join('');
+}
+function removeSupplyItem(i){ supplyList.splice(i,1); renderSupplyChecklist(); }
+
+function submitRequest(){
+  if(!activeReqType){ alert('Select a request type'); return; }
+  const reason = document.querySelector('.quick-reason-btn.selected');
+  const data = {
+    type: activeReqType,
+    operator: document.getElementById('reqOperator').value,
+    wo: document.getElementById('reqWO').value,
+    op: document.getElementById('reqOP').value,
+    reason: reason ? reason.dataset.r : '',
+    supplies: [...supplyList],
+    details: document.getElementById('reqDetails').value,
+    submittedBy: currentRole
+  };
+  window.fbSubmitRequest(activeReqMachine, data);
+  closeReqModal();
+}
+function clearRequest(machineName){ window.fbClearRequest(machineName); }
+function updateLiveFeedFromRequests(){
+  const keys = Object.keys(REQUESTS);
+  if(keys.length){
+    const last = keys[keys.length-1];
+    const r = REQUESTS[last];
+    document.getElementById('lfMachine').textContent = last;
+    document.getElementById('lfOp').textContent = r.reason || (r.wo ? 'WO '+r.wo : {blue:'Pending WO',red:'Inspection',yellow:'Machinist Req'}[r.type]);
+  }
+}
+
+function renderFloor(){
+  document.getElementById('floorGrid').innerHTML = CELLS.map(c=>`
+    <div class="cell">
+      <div class="cell-title">${c.name}</div>
+      <div class="machines">
+        ${c.machines.map(m=>{
+          const req = REQUESTS[m.n];
+          const st = statusFor(m.n);
+          let cls = st.running ? 'running' : '';
+          if(st.running && st.wo.priority==='hot') cls='hot';
+          if(st.running && st.wo.priority==='high') cls='high';
+          const ledStyle = req ? `style="background:${REQ_COLORS[req.type]};box-shadow:0 0 9px ${REQ_COLORS[req.type]};animation:pulse 1s infinite;"` : '';
+          const subText = req ? (req.reason || {blue:'WO Pending',red:'Inspection Needed',yellow:'Machinist Req'}[req.type]) : (st.running ? 'WO '+st.wo.wo : m.sub);
+          return `<div class="machine ${cls}" onclick="openReqModal('${m.n}','${c.name}')">
+            <div><div class="machine-name">${m.n}</div><div class="machine-sub">${subText}</div></div>
+            <div class="machine-led" ${ledStyle}></div>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>`).join('');
+
+  const running = WOS.find(w=>w.dayIdx===todayIdx() && w.weekOff===0);
+  if(running && !Object.keys(REQUESTS).length){
+    document.getElementById('lfMachine').textContent = running.machine;
+    document.getElementById('lfOp').textContent = 'WO '+running.wo;
+  }
+}
+
+function renderTV(){ if(document.getElementById('tvfsCards')) renderTvCell(); }
+
+// ── FULLSCREEN TV — cell carousel ──
+let tvCellIdx = 0;
+let tvMode = 'cell'; // cell | priority | all
+let tvAutoTimer = null;
+let machineMetrics = {}; // cached demo metrics per machine
+
+function metricsFor(name){
+  if(machineMetrics[name]) return machineMetrics[name];
+  const seed = name.split('').reduce((a,c)=>a+c.charCodeAt(0),0);
+  const rnd = (n)=> (seed*7919 % n);
+  const total = 20 + rnd(40);
+  const done = Math.min(total, rnd(total)+5);
+  const oee = 55 + rnd(40);
+  const util = 50 + rnd(45);
+  const cycle = (1.2 + (rnd(50)/10)).toFixed(1);
+  const code = 'C' + (100000 + rnd(900000));
+  const m = {total, done, oee, util, cycle, code, progress: Math.round(done/total*100)};
+  machineMetrics[name] = m;
+  return m;
+}
+
+function toggleRealFullscreen(){
+  const el = document.getElementById('page-tv');
+  if(!document.fullscreenElement){
+    el.requestFullscreen ? el.requestFullscreen() : null;
+  } else {
+    document.exitFullscreen();
+  }
+}
+
+let tvPaused = false;
+let tvProgressTimer = null;
+let tvAdvanceStart = 0;
+
+function tvClockTick(){
+  const n = new Date();
+  document.getElementById('tvClock').textContent = n.toLocaleTimeString([],{hour:'numeric',minute:'2-digit'});
+  document.getElementById('tvDate').textContent = n.toLocaleDateString([],{weekday:'long',month:'short',day:'numeric'}).toUpperCase();
+}
+setInterval(tvClockTick, 1000);
+tvClockTick();
+
+function restartAutoAdvance(){
+  clearInterval(tvAutoTimer);
+  clearInterval(tvProgressTimer);
+  const secs = parseInt(document.getElementById('tvSpeed').value);
+  document.getElementById('tvSpeedVal').textContent = secs+'S';
+  document.getElementById('tvAdvanceFill').style.width = '0%';
+  if(tvMode!=='cell' || tvPaused) return;
+  tvAdvanceStart = Date.now();
+  tvProgressTimer = setInterval(()=>{
+    const pct = Math.min(100, ((Date.now()-tvAdvanceStart)/(secs*1000))*100);
+    document.getElementById('tvAdvanceFill').style.width = pct+'%';
+  }, 100);
+  tvAutoTimer = setInterval(()=>{
+    tvCellIdx = (tvCellIdx+1) % CELLS.length;
+    renderTvDots(); renderTvCell();
+    tvAdvanceStart = Date.now();
+  }, secs*1000);
+}
+function togglePause(){
+  tvPaused = !tvPaused;
+  document.getElementById('tvPauseBtn').textContent = tvPaused ? '▶ RESUME' : '⏸ PAUSE';
+  restartAutoAdvance();
+}
+function setTvMode(mode){
+  tvMode = mode;
+  ['cell','priority','all'].forEach(m=>{
+    document.getElementById('tvModeBtn'+m.charAt(0).toUpperCase()+m.slice(1)).classList.toggle('active', m===mode);
+  });
+  document.getElementById('tvfsDots').style.display = mode==='cell' ? 'flex' : 'none';
+  restartAutoAdvance();
+  renderTvCell();
+}
+function toggleMachineStatus(){
+  document.getElementById('tvMachineStatusBtn').classList.toggle('on');
+}
+
+function renderTvDots(){
+  document.getElementById('tvfsDots').innerHTML = CELLS.map((c,i)=>
+    `<div class="tvfs2-dot ${i===tvCellIdx?'active':''}"></div>`).join('');
+  document.getElementById('tvfsCellLbl').textContent = CELLS[tvCellIdx].name.toUpperCase();
+}
+
+function machineCardHTML(m, cellName){
+  const st = statusFor(m.n);
+  const req = REQUESTS[m.n];
+  const met = metricsFor(m.n);
+  let cls = st.running ? '' : 'idle';
+  if(st.running && st.wo.priority==='hot') cls='hot';
+  if(st.running && st.wo.priority==='high') cls='high';
+  if(req) cls = req.type==='red' ? 'hot' : req.type==='yellow' ? 'high' : cls;
+  const chipText = st.running ? `${met.done} / ${met.total} — ${met.code}` : (req ? {blue:'WO Pending',red:'Inspection',yellow:'Machinist Req'}[req.type] : 'Idle');
+  return `<div class="tvfs-card ${cls}">
+    <div class="tvfs-card-head">
+      <div><div class="tvfs-mname">${m.n}</div><div class="tvfs-mcell">${cellName}</div></div>
+      <div class="tvfs-chip">${chipText}</div>
+    </div>
+    <div class="tvfs-stats">
+      <div class="tvfs-stat parts"><div class="bar"></div><div class="val">${st.running?met.done+'/'+met.total:'—'}</div><div class="lbl">Parts</div></div>
+      <div class="tvfs-stat oee"><div class="bar"></div><div class="val">${st.running?met.oee+'%':'—'}</div><div class="lbl">OEE</div></div>
+      <div class="tvfs-stat util"><div class="bar"></div><div class="val">${st.running?met.util+'%':'—'}</div><div class="lbl">Util</div></div>
+    </div>
+    <div class="tvfs-cycle">Cycle: <b>${st.running?met.cycle+' min':'—'}</b></div>
+    <div class="tvfs-progress"><div class="fill" style="width:${st.running?met.progress:0}%"></div></div>
+  </div>`;
+}
+
+function renderTvCell(){
+  if(tvMode==='cell'){
+    const c = CELLS[tvCellIdx];
+    document.getElementById('tvCellName').textContent = c.name;
+    document.getElementById('tvCounter').textContent = `${tvCellIdx+1} / ${CELLS.length}`;
+    document.getElementById('tvfsCards').innerHTML = c.machines.map(m=>machineCardHTML(m, c.name)).join('');
+  } else if(tvMode==='priority'){
+    document.getElementById('tvCellName').textContent = 'PRIORITY FIRST';
+    document.getElementById('tvCounter').textContent = `${MACHINES.length} MACHINES`;
+    const order = {hot:0, high:1, normal:2};
+    const sorted = [...MACHINES].sort((a,b)=>{
+      const sa = statusFor(a.name), sb = statusFor(b.name);
+      const pa = sa.running ? order[sa.wo.priority] : 3;
+      const pb = sb.running ? order[sb.wo.priority] : 3;
+      return pa-pb;
+    });
+    document.getElementById('tvfsCards').innerHTML = sorted.map(m=>machineCardHTML({n:m.name}, m.cell)).join('');
+  } else {
+    document.getElementById('tvCellName').textContent = 'ALL MACHINES';
+    document.getElementById('tvCounter').textContent = `${MACHINES.length} TOTAL`;
+    document.getElementById('tvfsCards').innerHTML = MACHINES.map(m=>machineCardHTML({n:m.name}, m.cell)).join('');
+  }
+}
+
+function weekDays(offset){
+  const d=new Date(); d.setHours(0,0,0,0);
+  const day=d.getDay();
+  const monday=new Date(d); monday.setDate(d.getDate()-(day===0?6:day-1)+offset*7);
+  const arr=[]; for(let i=0;i<5;i++){const x=new Date(monday);x.setDate(monday.getDate()+i);arr.push(x);} return arr;
+}
+function dateKey(d){ return d.toISOString().slice(0,10); }
+function render(){
+  if(currentRole!=='admin') return;
+  const days=weekDays(weekOffset);
+  document.getElementById('weekLabel').textContent = days[0].toLocaleDateString([],{month:'short',day:'numeric'})+' – '+days[4].toLocaleDateString([],{month:'short',day:'numeric'});
+  let html='<div class="g-corner"></div>';
+  const dnames=['MON','TUE','WED','THU','FRI']; const todayK=dateKey(new Date());
+  days.forEach((d,i)=>{ html+=`<div class="g-day ${dateKey(d)===todayK?'today':''}"><div class="dname">${dnames[i]}</div><div class="ddate">${d.getDate()}</div></div>`; });
+  MACHINES.forEach(m=>{
+    html+=`<div class="g-machine"><b>${m.name}</b><span>${m.cell}</span></div>`;
+    days.forEach((d,di)=>{
+      html+=`<div class="g-cell" data-machine="${m.name}" data-day="${di}" onclick="cellClick(this)">`;
+      WOS.filter(w=>w.machine===m.name && w.dayIdx===di && w.weekOff===weekOffset).forEach(w=>{ html+=chipHTML(w); });
+      html+='</div>';
+    });
+  });
+  document.getElementById('grid').innerHTML=html;
+  renderPool();
+}
+function chipHTML(w){ return `<div class="wo-chip ${w.priority}"><div class="wnum">${w.wo}</div></div>`; }
+function renderPool(){
+  const pool=WOS.filter(w=>!w.machine);
+  document.getElementById('poolCount').textContent=pool.length;
+  document.getElementById('poolBody').innerHTML = pool.map(w=>`
+    <div class="pool-card ${w.priority} ${selectedId===w.id?'selected':''}" onclick="selectWO('${w.id}')">
+      <div class="pnum">${w.wo}</div><div class="ppart">${w.part}</div>
+    </div>`).join('') || `<div style="color:#465563;font-size:13px;">All work orders assigned.</div>`;
+}
+function selectWO(id){
+  if(selectedId===id){ deselectWO(); return; }
+  selectedId=id; const w=WOS.find(x=>x.id===id);
+  document.getElementById('selectBanner').style.display='flex';
+  document.getElementById('selectLabel').textContent=`📌 ${w.wo} selected — tap a machine/day cell`;
+  renderPool();
+}
+function deselectWO(){ selectedId=null; document.getElementById('selectBanner').style.display='none'; renderPool(); }
+function cellClick(el){
+  if(!selectedId) return;
+  const w=WOS.find(x=>x.id===selectedId);
+  window.fbAssignWorkOrder(w.id, el.dataset.machine, parseInt(el.dataset.day), weekOffset);
+  deselectWO();
+}
+function shiftWeek(n){ weekOffset+=n; render(); }
+function openModal(){ document.getElementById('fWO').value=''; document.getElementById('fPart').value=''; document.getElementById('modalOverlay').classList.add('open'); }
+function closeModal(){ document.getElementById('modalOverlay').classList.remove('open'); }
+function saveWO(){
+  const wo=document.getElementById('fWO').value.trim(); const part=document.getElementById('fPart').value.trim();
+  if(!wo){ alert('Enter a work order number'); return; }
+  window.fbAddWorkOrder({wo, part, priority:document.getElementById('fPriority').value, machine:'', dayIdx:null, weekOff:null});
+  closeModal();
+}
+
+setInterval(()=>{ renderTV(); }, 5000);
+// Initial render calls happen once Firestore auth/listeners deliver data (see applyRole/onWorkOrdersUpdate/onRequestsUpdate)
+</script>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import { getFirestore, collection, doc, setDoc, getDoc, addDoc, updateDoc, deleteDoc, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDtT4d5Bdb7bZdJsLYtY7Gjg8xhcLqSKis",
+    authDomain: "diamond-machine-works.firebaseapp.com",
+    projectId: "diamond-machine-works",
+    storageBucket: "diamond-machine-works.firebasestorage.app",
+    messagingSenderId: "119589320825",
+    appId: "1:119589320825:web:f7cae0a275651d7d183ca8",
+    measurementId: "G-5BKYNFRKNV"
+  };
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  let seededWO = false;
+  let listenersStarted = false;
+
+  window.fbSignIn = (email, password) => signInWithEmailAndPassword(auth, email, password);
+  window.fbSignOut = () => signOut(auth);
+
+  onAuthStateChanged(auth, async (user) => {
+    if(user){
+      let role = 'employee';
+      try{
+        const userRef = doc(db, 'users', user.uid);
+        const snap = await getDoc(userRef);
+        if(snap.exists()){
+          role = snap.data().role || 'employee';
+        } else {
+          await setDoc(userRef, {email: user.email, role: 'employee', createdAt: serverTimestamp()});
+        }
+      }catch(e){ console.error('Role lookup failed:', e); }
+      window.applyRole(role);
+      if(!listenersStarted){ listenersStarted = true; startListeners(); }
+    } else {
+      window.showLoginScreen();
+    }
+  });
+
+  function startListeners(){
+    onSnapshot(collection(db,'workOrders'), (snap)=>{
+      if(snap.empty && !seededWO){
+        seededWO = true;
+        window.SEED_WOS.forEach(w=>{ setDoc(doc(db,'workOrders', w.id), w); });
+        return; // the seed writes will retrigger this snapshot
+      }
+      const arr = [];
+      snap.forEach(d=> arr.push({id:d.id, ...d.data()}));
+      window.onWorkOrdersUpdate(arr);
+    });
+
+    onSnapshot(collection(db,'requests'), (snap)=>{
+      const obj = {};
+      snap.forEach(d=> obj[d.id] = d.data());
+      window.onRequestsUpdate(obj);
+    });
+  }
+
+  window.fbSubmitRequest = (machine, data) => setDoc(doc(db,'requests', machine), {...data, updatedAt: serverTimestamp()});
+  window.fbClearRequest = (machine) => deleteDoc(doc(db,'requests', machine));
+  window.fbAddWorkOrder = (data) => addDoc(collection(db,'workOrders'), data);
+  window.fbAssignWorkOrder = (id, machine, dayIdx, weekOff) => updateDoc(doc(db,'workOrders', id), {machine, dayIdx, weekOff});
+</script>
+</body>
+</html>
