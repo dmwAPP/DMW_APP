@@ -66,8 +66,9 @@
 
   .page{display:none;position:relative;z-index:2;}
   .page.active{display:block;}
+  #page-shop.active, #page-tv.active{display:flex;}
 
-  #page-shop{height:calc(100vh - 88px);overflow:hidden;padding:6px 8px;display:flex;flex-direction:column;gap:5px;}
+  #page-shop{height:calc(100vh - 88px);overflow:hidden;padding:6px 8px;flex-direction:column;gap:5px;}
 
   .live-feed-strip{background:rgba(125,211,252,.05);border:1px solid rgba(125,211,252,.25);border-radius:8px;
     padding:5px 12px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;flex-shrink:0;}
@@ -129,7 +130,7 @@
   .fab-chip{background:rgba(255,255,255,.03);border:1px solid rgba(217,119,6,.25);border-radius:6px;padding:3px 11px;
     font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:1px;color:#e3c396;}
 
-  #page-tv{height:calc(100vh - 88px);overflow:hidden;display:flex;flex-direction:column;background:var(--bg0);}
+  #page-tv{height:calc(100vh - 88px);overflow:hidden;flex-direction:column;background:var(--bg0);}
   #page-tv:fullscreen{height:100vh;}
   .tv-toolbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
   .tv-toolbar .lbl{font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:2px;color:var(--sub);}
