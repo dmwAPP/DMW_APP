@@ -215,7 +215,10 @@
   .tvfs-stat.util .bar{background:var(--blue);}
   .tvfs-stat .val{font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--text);margin-bottom:2px;}
   .tvfs-stat .lbl{font-size:10px;letter-spacing:2px;color:var(--faint);text-transform:uppercase;}
+  .tvfs-current-job{font-size:13px;color:#dbe6ee;font-weight:600;margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid rgba(255,255,255,.06);}
   .tvfs-cycle{font-size:12px;color:var(--sub);margin-bottom:8px;}
+  .tvfs-next-job{font-size:12px;color:var(--sub);margin-top:8px;padding-top:8px;border-top:1px dashed rgba(255,255,255,.1);}
+  .tvfs-next-job b{color:var(--cyan);font-weight:700;}
   .tvfs-cycle b{color:var(--green);font-weight:700;}
   .tvfs-progress{height:9px;border-radius:5px;background:var(--steel);overflow:hidden;}
   .tvfs-progress .fill{height:100%;background:linear-gradient(90deg,var(--green),var(--blue));border-radius:5px;}
@@ -661,6 +664,18 @@ function statusFor(machineName){
   if(!w) return {running:false};
   return {running:true, wo:w};
 }
+const DAY_NAMES = ['Mon','Tue','Wed','Thu','Fri'];
+function nextJobFor(machineName){
+  // Look for the next scheduled WO on this machine, later this week, then next week
+  const upcoming = WOS
+    .filter(w=>w.machine===machineName && w.dayIdx!==null && w.weekOff!==null)
+    .filter(w=> (w.weekOff===0 && w.dayIdx>todayIdx()) || w.weekOff>0)
+    .sort((a,b)=> (a.weekOff-b.weekOff) || (a.dayIdx-b.dayIdx));
+  if(!upcoming.length) return null;
+  const n = upcoming[0];
+  const dayLabel = n.weekOff>0 ? `${DAY_NAMES[n.dayIdx]} (next wk)` : DAY_NAMES[n.dayIdx];
+  return {wo:n.wo, part:n.part, dayLabel};
+}
 
 // ── REQUESTS (the money feature) — keyed by machine name, live from Firestore ──
 let REQUESTS = {};
@@ -865,6 +880,7 @@ function machineCardHTML(m, cellName){
   const st = statusFor(m.n);
   const req = REQUESTS[m.n];
   const met = metricsFor(m.n);
+  const next = nextJobFor(m.n);
   let cls = st.running ? '' : 'idle';
   if(st.running && st.wo.priority==='hot') cls='hot';
   if(st.running && st.wo.priority==='high') cls='high';
@@ -875,12 +891,14 @@ function machineCardHTML(m, cellName){
       <div><div class="tvfs-mname">${m.n}</div><div class="tvfs-mcell">${cellName}</div></div>
       <div class="tvfs-chip">${chipText}</div>
     </div>
+    ${st.running ? `<div class="tvfs-current-job">WO ${st.wo.wo} — ${st.wo.part}</div>` : ''}
     <div class="tvfs-stats">
       <div class="tvfs-stat parts"><div class="bar"></div><div class="val">${st.running?met.done+'/'+met.total:'—'}</div><div class="lbl">Parts</div></div>
       <div class="tvfs-stat oee"><div class="bar"></div><div class="val">${st.running?met.oee+'%':'—'}</div><div class="lbl">OEE</div></div>
       <div class="tvfs-stat util"><div class="bar"></div><div class="val">${st.running?met.util+'%':'—'}</div><div class="lbl">Util</div></div>
     </div>
     <div class="tvfs-cycle">Cycle: <b>${st.running?met.cycle+' min':'—'}</b></div>
+    <div class="tvfs-next-job">Next: <b>${next ? `WO ${next.wo} — ${next.part} (${next.dayLabel})` : 'Nothing scheduled'}</b></div>
     <div class="tvfs-progress"><div class="fill" style="width:${st.running?met.progress:0}%"></div></div>
   </div>`;
 }
